@@ -8,7 +8,7 @@ from lcmap.db.cassandra import save
 
 def slurp(where="."):
     here = pathlib.Path(where)
-    paths = list(here.glob("**/*_band1.hdr"))
+    paths = list(here.glob("**/*.hdr"))
     for path in paths:
         logger.info('ingesting %s', path)
         img = spectral.open_image(str(path))
@@ -48,16 +48,16 @@ def ingest(img, size = 100, res = 30):
             data = img.read_subregion((row, row + size), (col, col + size))
             ex = x + col * res
             ey = y + row * res
+            source = "TBD"
             if ignore:
                 if not np.all(data == ignore):
-                    save(proj, ex, ey, layer, time, data)
-                    #logger.debug('save %s:<%s,%s>@%s', layer, ex, ey, time)
+                    save(ex, ey, layer, time, data, source)
+                    logger.debug('save %s:<%s,%s>@%s %s', layer, ex, ey, time, source)
                 else:
-                    pass
-                    #logger.debug('skip %s:<%s,%s>@%s (entirely no data)', layer, ex, ey, time)
+                    logger.debug('skip %s:<%s,%s>@%s %s (entirely no data)', layer, ex, ey, time, source)
             else:
-                logger.debug('save %s:<%s,%s>@%s', layer, ex, ey, time)
-                save(proj, ex, ey, layer, time, data)
+                logger.debug('save %s:<%s,%s>@%s %s', layer, ex, ey, time)
+                save(ex, ey, layer, time, data, source)
 
 
 import logging

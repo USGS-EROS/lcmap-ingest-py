@@ -11,57 +11,52 @@ session = cluster.connect(config.CASSANDRA_KEYSPACE)
 
 
 select = session.prepare("""
-SELECT extent_x, extent_y, layer_id, acquired_at, data, type FROM tiles WHERE
-  projection = ? AND
-  extent_x = ? AND
-  extent_y = ? AND
-  layer_id = ? AND
-  acquired_at > ? AND
-  acquired_at < ?
+SELECT x, y, layer, acquired, data, type, source FROM EPSG_5070 WHERE
+  x = ? AND
+  y = ? AND
+  layer = ? AND
+  acquired > ? AND
+  acquired < ?
 """)
 
 insert  = session.prepare("""
-  INSERT INTO tiles (
-    projection,
-    extent_x,
-    extent_y,
-    layer_id,
-    acquired_at,
-    data,
-    type
+  INSERT INTO EPSG_5070 (
+    x, y, layer, acquired,
+    data, type, source
     ) VALUES (?,?,?,?,?,?,?)
 """)
 
 
-def save(projection, extent_x, extent_y, layer, acquired, data):
-    return session.execute(insert, (projection, extent_x, extent_y,
-                           layer, acquired, data, str(data.dtype)))
+def save(extent_x, extent_y, layer, acquired, data, source):
+    return session.execute(insert, (extent_x, extent_y,
+                           layer, acquired, data, str(data.dtype), source))
 
 
-def find(projection="EPSG:5070", x=None, y=None, layer=None, t1=None, t2=None):
+def find(x=None, y=None, layer=None, t1=None, t2=None):
     """Find a layer, no masking, no data to array conversion."""
     t1 = datetime.datetime.strptime(t1, "%Y-%m-%d")
     t2 = datetime.datetime.strptime(t2, "%Y-%m-%d")
-    results = session.execute(
-        select, parameters=(projection, x, y, layer, t1, t2))
+    results = session.execute(select, parameters=(x, y, layer, t1, t2))
     return results
 
 
-def search(projection, x, y, layer, t1, t2, masks=None):
+def search(x, y, layer, t1, t2, masks=None):
     """Find a layer and mask it using others."""
     t1 = datetime.datetime.strptime(t1, "%Y-%m-%d")
     t2 = datetime.datetime.strptime(t2, "%Y-%m-%d")
     timeout = 60.0
-    data_results = session.execute(
-        select, parameters=(projection, x, y, layer, t1, t2), timeout=timeout)
+    data_results = session.execute(select,
+      parameters=(x, y, layer, t1, t2),
+      timeout=timeout)
 
     data_cube = np.dstack([as_array(r) for r in data_results])
     data_cube = ma.masked_equal(data_cube, -9999)
 
     if masks:
         for mask in masks:
-            mask_results = session.execute(
-                select, parameters=(projection, x, y, mask, t1, t2), timeout=timeout)
+            mask_results = session.execute(select,
+              parameters=(x, y, mask, t1, t2),
+              timeout=timeout)
             if mask_results:
                 mask_cube = np.dstack([as_array(m) for m in mask_results])
                 data_cube = ma.masked_array(data_cube, mask_cube)
