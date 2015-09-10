@@ -48,16 +48,16 @@ def ingest(img, size = 100, res = 30):
             data = img.read_subregion((row, row + size), (col, col + size))
             ex = x + col * res
             ey = y + row * res
-            source = "TBD"
             if ignore:
                 if not np.all(data == ignore):
-                    save(ex, ey, layer, time, data, source)
-                    logger.debug('save %s:<%s,%s>@%s %s', layer, ex, ey, time, source)
+                    save(proj, ex, ey, mission, None, layer, time, data)
+                    #logger.debug('save %s:<%s,%s>@%s', layer, ex, ey, time)
                 else:
-                    logger.debug('skip %s:<%s,%s>@%s %s (entirely no data)', layer, ex, ey, time, source)
+                    pass
+                    #logger.debug('skip %s:<%s,%s>@%s (entirely no data)', layer, ex, ey, time)
             else:
-                logger.debug('save %s:<%s,%s>@%s %s', layer, ex, ey, time)
-                save(ex, ey, layer, time, data, source)
+                logger.debug('save %s:<%s,%s>@%s', layer, ex, ey, time)
+                save(proj, ex, ey, mission, None, layer, time, data)
 
 
 import logging
