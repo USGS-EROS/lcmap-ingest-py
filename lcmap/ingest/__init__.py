@@ -1,3 +1,3 @@
-# from lcmap.ingest.envi import slurp
-# import logging
-# logger = logging.getLogger(__name__)
+from lcmap.ingest.envi import slurp
+import logging
+logger = logging.getLogger(__name__)

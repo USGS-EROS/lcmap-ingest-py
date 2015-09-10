@@ -6,18 +6,15 @@ import osr
 import math
 import subprocess
 import json
-import tarfile
-import shutil
-import os
 
 
 def nearest(n, mul=30, off = 0):
-    """Find nearest multiple of n (with a given offset).
+  """Find nearest multiple of n (with a given offset).
 
-    This is useful for getting consistent coordinates for
-    scenes that exhibit wiggle.
-    """
-    return round((n-off)/mul)*mul+off
+  This is useful for getting consistent coordinates for
+  scenes that exhibit wiggle.
+  """
+  return round((n-off)/mul)*mul+off
 
 
 def extents(path, epsg=5070):
@@ -68,36 +65,13 @@ def extents(path, epsg=5070):
     o['y_max'] = nearest(y_max+1500, mul=3000)
     return {'extent-in': i, 'extent-out': o}
 
-
-def decompress(path):
-    """
-    Decompress and extract a tar.gz file to a directory.
-    The destination directory path is returned.
-    """
-    if (path.endswith("tar.gz")):
-        basedir = os.path.splitext(path)[0]
-        tar = tarfile.open(path)
-        tar.extractall(basedir)
-        tar.close()
-        return basedir
-    else:
-        raise ValueError("File was not a valid compressed tarfile")
-
-
-def rmdir(path):
-    """
-    Recursively delete a directory and all of its contents
-    """
-    shutil.rmtree(path)
-
-
 # python exents.py LC80440332015128LGN00/LC80440332015128LGN00_B1.TIF
 
-# import argparse
-# parser = argparse.ArgumentParser()
-# parser.add_argument('src', help='source input (a geotiff)')
-# args = vars(parser.parse_args())
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('src', help='source input (a geotiff)')
+args = vars(parser.parse_args())
 
-# extent = extents(args['src'])
-# print(args['src'])
-# print(json.dumps(extent,sort_keys=True, indent=4))
+extent = extents(args['src'])
+print(args['src'])
+print(json.dumps(extent,sort_keys=True, indent=4))
