@@ -1,0 +1,138 @@
+#!/usr/bin/env python
+
+"""
+   ingest
+   ~~~~~~
+
+   Ingest turns ESPA generated scenes, turns them into tiles,
+   and saves them to Cassandra. It is designed to minimize your
+   effort and tell you how things went by logging detailed progress.
+
+   For example, it can take an entired directory that contains
+   compressed ESPA generated files:
+
+   python ingest.py "data/*045026*.tar.gz" > ingest.log
+
+"""
+
+import logging
+import sys
+import os
+
+# Try running as an installed module
+try:
+    from lcmap.version import __version__
+except ImportError:
+    # Try adding `pwd` to PYTHONPATH
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from lcmap.version import __version__
+
+
+# Logging to stdout is useful for debugging
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(ch)
+
+# More detailed logging is available too...
+# lcmap_logger = logging.getLogger('lcmap')
+# lcmap_logger.setLevel(logging.INFO)
+# lcmap_logger.addHandler(sh)
+
+
+# We're doing some work with zip files and temporary directories.
+import os.path
+import glob
+import tempfile
+import tarfile
+import contextlib
+import traceback
+import multiprocessing as mp
+import numpy as np
+import lcmap.config as config
+
+# Click makes command line programs a bit more concise...
+import click
+
+# Keep the ESPA XML files nice and isolated.
+from lcmap.ingest.scene import Scene
+import lcmap.db.tile
+import lcmap.db.scene
+
+
+@contextlib.contextmanager
+def temporarily_expanded(path):
+    """Extract an archive to a temporary directory"""
+
+    try:
+        # Allocate temporary space. If this does not succeed,
+        # we don't even bother with anything else.
+        into = tempfile.TemporaryDirectory()
+        data = tarfile.open(str(path))
+        logger.debug("decompressing {0} to {1}".format(path, into.name))
+        data.extractall(into.name)
+        yield into.name
+    finally:
+        # We need to make sure that `into' is actually assigned
+        # a value...
+        logger.debug("removing extracted files {0}".format(into.name))
+        into.cleanup()
+
+
+def ingest(scene, keyspace, table, grid_size):
+    """Tile and save all available bands in scene."""
+    band_count = len(scene.bands)
+    for idx, band in enumerate(scene.bands):
+        progress = "{0} [{2:0>2}/{3:0>2}] {1:<20} "
+        logger.info(progress.format(scene.name, band.name, idx + 1, band_count))
+        for tile in band.tiles(grid_size):
+            if not np.all(tile['data'] == band.fill):
+                lcmap.db.tile.save(**tile)
+        band.free()
+
+
+def expand_and_ingest(file, keyspace, table, grid_size, file_idx=0, file_count=0):
+    """Multiprocessing friendly tiling function."""
+    try:
+        with temporarily_expanded(file) as scene_path:
+            scene = Scene(scene_path)
+            progress = "{0} [{1:0>3}/{2:0>3}] ingest started from {3}"
+            logger.info(progress.format(scene.name, file_idx, file_count, scene_path))
+            ingest(scene, keyspace, table, grid_size)
+            logger.info("{0} ingest finished".format(scene.name))
+    except Exception as err:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_tb(exc_traceback, limit=2, file=sys.stderr)
+        logger.error("ingest failed {0}: {1}".format(file, err))
+
+
+def meow(**kwargs):
+    print(kwargs)
+
+
+@click.command()
+@click.argument("source",    default="data/*.tar.gz")
+@click.option("--grid",      default=100, help="size of tile (height and width)")
+@click.option("--keyspace",  default="lcmap (ignored for now)")
+@click.option("--table",     default="epsg_5070 (ignored for now)")
+def process(source, grid, keyspace, table):
+    """Ingest multiple scenes."""
+
+    logger.info("processing started")
+
+    # Create a sorted list of files, sorting helps keep track of progress
+    # in addition to the file total and enumeration index.
+    files = glob.glob(source)
+    files.sort()
+
+    for idx, file in enumerate(files):
+        expand_and_ingest(file, file_idx=idx+1, file_count=len(files),
+            keyspace=keyspace, table=table, grid_size=grid)
+
+    logger.info("processing complete")
+
+
+if __name__ == "__main__":
+    process()

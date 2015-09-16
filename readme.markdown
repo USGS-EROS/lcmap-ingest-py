@@ -9,3 +9,24 @@ This project is hosted by the US Geological Survey (USGS) Earth Resources Observ
 and Science (EROS) Land Change Monitoring, Assessment, and Projection (LCMAP) Project.
 For questions regarding this source code, please contact the Landsat Contact Us page
 and specify USGS LCMAP in the "Regarding" section. https://landsat.usgs.gov/contactus.php
+
+
+## Example Usage
+
+```
+export TEMP=/data/tmp
+nohup python ingest.py "/data/Landsat/*045026*" > 045026.log &
+nohup python ingest.py "/data/Landsat/*045027*" > 045027.log &
+nohup python ingest.py "/data/Landsat/*045028*" > 045028.log &
+nohup python ingest.py "/data/Landsat/*045029*" > 045029.log &
+nohup python ingest.py "/data/Landsat/*046026*" > 046026.log &
+nohup python ingest.py "/data/Landsat/*046027*" > 046027.log &
+nohup python ingest.py "/data/Landsat/*046028*" > 046028.log &
+nohup python ingest.py "/data/Landsat/*046029*" > 046029.log &
+```
+
+## Installation
+
+```
+pip install git+https://github.com/USGS-EROS/lcmap-py.git@topic/refactor
+```
