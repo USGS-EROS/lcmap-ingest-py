@@ -11,15 +11,30 @@ import osr
 import math
 import subprocess
 import json
+import pyproj
+import math
 
 
-def nearest(n, mul=30, off = 0):
-  """Find nearest multiple of n (with a given offset).
+epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
-  This is useful for getting consistent coordinates for
-  scenes that exhibit wiggle.
-  """
-  return round((n-off)/mul)*mul+off
+
+def snap(x, y, grid=30*100):
+    """Convert an x/y to the nearest grid coordinate."""
+    sy = math.ceil(y / grid) * grid
+    sx = math.floor(x / grid) * grid
+    return sx, sy
+
+
+def to_lon_lat(x, y):
+    """Convert a EPSG:5070 relative x,y to lon,lat."""
+    lon, lat = epsg_5070(x, y, inverse=True)
+    return lon, lat
+
+
+def to_epsg_5070(lon, lat):
+    """Convert a lon,lat to EPSG:5070 x,y."""
+    x, y = epsg_5070(lon, lat)
+    return round(x), round(y)
 
 
 def extents(path, epsg=5070):
