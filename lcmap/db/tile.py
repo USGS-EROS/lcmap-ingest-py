@@ -26,14 +26,19 @@ def save(x, y, layer, source, acquired, data, data_type, data_fill, data_range, 
     return session.execute(SAVE, parameters)
 
 
-FIND_CQL = """SELECT x, y, layer, source, acquired, data, data_type FROM epsg_5070 WHERE
+FIND_CQL = """SELECT * FROM epsg_5070 WHERE
     x = ? AND y = ? AND layer = ? AND acquired > ? AND acquired < ?"""
 
 FIND = session.prepare(FIND_CQL)
 
 
 def find(x, y, layer, t1, t2):
-    """Find"""
+    """Find a tile containing x, y.
+
+    This does not post-process results. It returns a list of rows results
+    that can be further processed. This means that the data blob isn't even
+    a usable array.
+    """
     logger.debug("find <%s,%s> (%s) @ %s-%s." % (layer, x, y, t1, t2))
     t1 = datetime.strptime(t1, "%Y-%m-%d")
     t2 = datetime.strptime(t2, "%Y-%m-%d")
