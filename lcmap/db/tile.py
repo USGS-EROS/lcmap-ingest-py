@@ -3,6 +3,7 @@ from lcmap.ingest import util
 from lcmap.db.connection import session
 from cassandra.concurrent import execute_concurrent_with_args
 from datetime import datetime
+import lcmap.db.util as db_util
 
 
 import logging
@@ -27,7 +28,7 @@ def save(x, y, layer, source, acquired, data, data_type, data_fill, data_range, 
 
 
 FIND_CQL = """SELECT * FROM epsg_5070 WHERE
-    x = ? AND y = ? AND layer = ? AND acquired > ? AND acquired < ?"""
+    x = ? AND y = ? AND layer in ? AND acquired > ? AND acquired < ?"""
 
 FIND = session.prepare(FIND_CQL)
 
@@ -48,7 +49,7 @@ def find(x, y, layer, t1, t2):
     return results
 
 
-def find_area(x1, y1, x2, y2, layer, t1, t2, grid=30 * 100):
+def find_area(x1, y1, x2, y2, layers, t1, t2, grid=30 * 100):
     """Find an area containing x1:x2, y1:y2.
 
     Like find, this function does not post-process results. This is a simple
@@ -59,13 +60,29 @@ def find_area(x1, y1, x2, y2, layer, t1, t2, grid=30 * 100):
     ux, uy = util.snap(x1, y1)
     # ...and the lower right points
     lx, ly = util.snap(x2, y2)
-    xs = range(ux, lx, grid)
-    ys = range(uy, ly, grid)
+
+    # TODO - offset?  something must be wrong somewhere
+    x_offset = -600
+    y_offset = -200
+    xs = range(ux + x_offset, lx + x_offset, grid)
+    ys = range(uy + y_offset, ly + y_offset, -1 * grid)
 
     # We only support one basic date format...
     dtfmt = "%Y-%m-%d"
     t1, t2 = datetime.strptime(t1, dtfmt), datetime.strptime(t2, dtfmt)
 
-    args = [(tx, ty, layer, t1, t2) for ty in ys for tx in xs]
-    results = execute_concurrent_with_args(session, tile.FIND, args)
+    # support a list of layers which is faster than individual queries for each layer
+    if isinstance(layers, str):
+        layers = [layers]
+
+    args = [(tx, ty, layers, t1, t2) for ty in ys for tx in xs]
+    logger.info('num of statments = {0}'.format(len(args)))
+    results = execute_concurrent_with_args(session, FIND, args)
+
+    # log any errors
+    errors = [result[1] for result in results if not result[0]]
+    if len(errors) > 0:
+        logger.info(errors)
+        [logger.error(e) for e in errors]
+
     return results
