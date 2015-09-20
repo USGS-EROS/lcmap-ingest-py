@@ -24,7 +24,8 @@ try:
     from lcmap.version import __version__
 except ImportError:
     # Try adding `pwd` to PYTHONPATH
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from lcmap.version import __version__
 
 
@@ -37,9 +38,9 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 # More detailed logging is available too...
-# lcmap_logger = logging.getLogger('lcmap')
-# lcmap_logger.setLevel(logging.INFO)
-# lcmap_logger.addHandler(sh)
+lcmap_logger = logging.getLogger('lcmap')
+lcmap_logger.setLevel(logging.DEBUG)
+lcmap_logger.addHandler(ch)
 
 
 # We're doing some work with zip files and temporary directories.
@@ -81,30 +82,30 @@ def temporarily_expanded(path):
         into.cleanup()
 
 
-def ingest(scene, keyspace, table, grid_size):
+def ingest(scene, tile_size, pixel_size):
     """Tile and save all available bands in scene."""
     band_count = len(scene.bands)
     for idx, band in enumerate(scene.bands):
         progress = "{0} [{2:0>2}/{3:0>2}] {1:<20} "
-        logger.info(progress.format(scene.name, band.name, idx + 1, band_count))
-        for tile in band.tiles(grid_size):
+        logger.info(
+            progress.format(scene.name, band.name, idx + 1, band_count))
+        for tile in band.tiles(tile_size=tile_size, pixel_size=pixel_size):
             if not np.all(tile['data'] == band.fill):
                 lcmap.db.tile.save(**tile)
         band.free()
 
 
-def expand_and_ingest(file, keyspace, table, grid_size, file_idx=0, file_count=0):
+def expand_and_ingest(file, tile_size, pixel_size, file_idx=0, file_count=0):
     """Multiprocessing friendly tiling function."""
     try:
         with temporarily_expanded(file) as scene_path:
             scene = Scene(scene_path)
             progress = "{0} [{1:0>3}/{2:0>3}] ingest started from {3}"
-            logger.info(progress.format(scene.name, file_idx, file_count, scene_path))
-            ingest(scene, keyspace, table, grid_size)
+            logger.info(
+                progress.format(scene.name, file_idx, file_count, scene_path))
+            ingest(scene, tile_size, pixel_size)
             logger.info("{0} ingest finished".format(scene.name))
     except Exception as err:
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_tb(exc_traceback, limit=2, file=sys.stderr)
         logger.error("ingest failed {0}: {1}".format(file, err))
 
 
@@ -113,11 +114,10 @@ def meow(**kwargs):
 
 
 @click.command()
-@click.argument("source",    default="data/*.tar.gz")
-@click.option("--grid",      default=100, help="size of tile (height and width)")
-@click.option("--keyspace",  default="lcmap (ignored for now)")
-@click.option("--table",     default="epsg_5070 (ignored for now)")
-def process(source, grid, keyspace, table):
+@click.argument("source",     default="data/*.tar.gz")
+@click.option("--tile-size",  default=100)
+@click.option("--pixel-size", default=30)
+def process(source, tile_size, pixel_size):
     """Ingest multiple scenes."""
 
     logger.info("processing started")
@@ -128,8 +128,8 @@ def process(source, grid, keyspace, table):
     files.sort()
 
     for idx, file in enumerate(files):
-        expand_and_ingest(file, file_idx=idx+1, file_count=len(files),
-            keyspace=keyspace, table=table, grid_size=grid)
+        expand_and_ingest(file, file_idx=idx + 1, file_count=len(files),
+                          tile_size=tile_size, pixel_size=pixel_size)
 
     logger.info("processing complete")
 

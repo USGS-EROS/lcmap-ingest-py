@@ -13,15 +13,18 @@ import subprocess
 import json
 import pyproj
 import math
+import numpy as np
 
 
 epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
 
-def snap(x, y, grid=30*100):
+def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30):
     """Convert an x/y to the nearest grid coordinate."""
-    sy = math.ceil(y / grid) * grid
-    sx = math.floor(x / grid) * grid
+    grid_x = tile_size * pixel_x
+    grid_y = tile_size * pixel_y
+    sx = math.floor(x / grid_x) * grid_x
+    sy = math.ceil(y / grid_x) * grid_y
     return sx, sy
 
 
@@ -38,10 +41,10 @@ def to_epsg_5070(lon, lat):
 
 
 def extents(path, epsg=5070):
-    """
-    Calculate "framing" extents for a scene.  This will give you the
-    x-min, y-min, x-max, y-max values in meters relative to the origin
-    of the projection (EPSG-5070 / Albers-Conus).
+    """Calculate "framing" extents for a scene.
+
+    This returns the x-min, y-min, x-max, y-max values in meters relative
+    to the origin of the projection (EPSG-5070 / Albers-Conus).
 
     """
     coord_ls = []
@@ -87,26 +90,58 @@ def extents(path, epsg=5070):
     return {'extent-in': i, 'extent-out': o}
 
 
-def tiles(path, **kwargs):
+def frame(original, ux=0, uy=0, tx=100, ty=100, fill=0):
+    """Surround data not aligned to the tile grid with fill data.
+
+    This function doesn't know anything about coordinate systems. You must
+    pass in raster grid upper left coordinates. See to_raster_grid() if you
+    need to perform this conversion.
+
+    ux upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
+    uy upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
+    tx pixel width of tile
+    ty pixel height of tile
     """
-    Returns a tile generator for the file at the given path. Each tile is
-    a triple of: <col>, <row>, <data>
+    ow, oh = original.shape
 
-    This emits a structure that has tile properties (x,y,data,type) merged
-    with kwargs to allow other data to be passed through. This is expected to
-    be things like a scene ID, scene acquisition time (which is not included
-    in a path usually), but it could theoretically be anything that can't
-    be pulled from the image.
+    # calculate the x-offset
+    x_off = abs(math.floor(ux / tx) * tx - ux)
+    y_off = abs(math.floor(uy / ty) * ty - uy)
+    # print(x_off,ow,y_off,oh)
 
-    Please note, the x and y coordinates are in terms of the projection system,
-    not the grid coordinates! In other words, these are *not* from zero to
-    the dimensions of the grid.
+    # determine how wide the new array needs to be
+    # bug. wrong.
+    x_size = math.ceil((x_off + ow) / tx) * tx
+    y_size = math.ceil((y_off + oh) / ty) * ty
 
-    Furthermore, we assume that a file only has one raster band for now.
+    # prepare a new array that is the same type and properly filled
+    framed = np.full((x_size, y_size), fill, dtype=original.dtype)
+
+    # copy data from the original array
+    framed[x_off:x_off+ow, y_off:y_off+oh] = original
+
+    return framed
+
+
+def frame_raster(raster, tile_size, fill):
+    """Create a tile-grid aligned array from a GDAL raster.
+
+    This will return an array padded with the fill value and the upper-left
+    projection system coordinates of the new array.
     """
+    original = np.array(raster.ReadAsArray())
 
-    grid = 100 # size in pixels, configurable maybe??
-    raster = gdal.Open(path)
-    for row in range(0, raster.RasterYSize, grid):
-        for col in range(0, raster.RasterXSize, grid):
-            yield col, row, raster.ReadAsArray(col, row, grid, grid)
+    ux, ox, _, uy, _, oy = raster.GetGeoTransform()
+
+    # The column and row of the pixel in terms of a raster grid. Suppose we
+    # have 100 meter pixels projected in EPSG:5070. Every 100 meter change
+    # along an axis is 1 step in the raster grid.
+    rx, ry = int(ux / ox), int(uy / oy)
+
+    # Don't forget to provide fill data...
+    framed = frame(original, rx, ry, tx=tile_size, ty=tile_size, fill=fill)
+
+    # The new upper left point in the coordinate system after padding.
+    cx, cy = snap(ux, uy, tile_size=tile_size,  pixel_x=ox, pixel_y=oy)
+
+    return framed, cx, cy
