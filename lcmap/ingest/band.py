@@ -123,7 +123,6 @@ class Band:
         # otherwise pixels "straddle" between two pixels on the tile grid.
         if (ux % pixel_size) or (uy % pixel_size):
             msg = "band {0} upper left coordinate ({1},{2}) must be an even multiple of pixel_size ({3})"
-            msg = textwrap.dedent(msg)
             params = (self.name, ux, uy, pixel_size)
             raise errors.IngestInputException(msg.format(*params))
 
