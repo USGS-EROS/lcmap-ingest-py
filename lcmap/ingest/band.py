@@ -16,48 +16,65 @@
 
 import os
 import gdal
+import math
 import numpy as np
+import lcmap.ingest.util as util
+import lcmap.ingest.errors as errors
+
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 class Band:
 
-    def __init__(self, xml, scene):
-        self.xml = xml
+    def __init__(self, scene, name, path, fill, valid_range, scale):
         self.scene = scene
+        self.name = name
+        self.path = path
+        self.fill = fill
+        self.valid_range = valid_range
+        self.scale = scale
 
-    #
-    # Behavior for a Band that cannot be pulled directly from metadata
-    #
 
-    @property
-    def path(self):
-        file_name = self.xml.find("file_name").text
-        return os.path.join(self.scene.dirpath, file_name)
-
-    def tiles(self, size = 100):
+    def tiles(self, tile_size, pixel_size):
         """Generate tiles (as a generator)
 
         Please note that the x and y properties of the yielded object are
         in projection coordinates, not raster coordinates. Refer to x_raster
         and y_raster for the column and row image coordinate values if you
-        require that instead.
+        require that instead. We expect tiles to be square, with equally sized
+        pixels in the x and y directions!
+
+        - tile_size: the height and width of tile in pixels
+        - pixel_size: the number of projection coordinate units of each pixel.
         """
-        for row in range(0, self.raster.RasterYSize, size):
-            for col in range(0, self.raster.RasterXSize, size):
+        # Calculate projection system coordinates. Do not use XML
+        # or MTL values: they are NOT correct!!
+        # ux, uy = upper x and y
+        # ox, oy = offset w-e and n-s ... unit size of pixel (e.g. 30 meters)
+        # rx, ry = roation, ignored ...
+        #
+        # This is the right order, even though it seems strange. It is
+        # expected that oy is negative... and that ux and uy are multiples
+        # of the tiling grid (30*100 = strides of 3,000)
+        #
+        ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
+
+        if self.misfit(tile_size, pixel_size):
+            logger.debug("raster misfit")
+            a, ux, uy = util.frame_raster(self.raster, tile_size, self.fill)
+        else:
+            logger.debug("raster aligned")
+            a = np.array(self.raster.ReadAsArray())
+
+        rows, cols = a.shape
+        for row in range(0, rows, tile_size):
+            for col in range(0, rows, tile_size):
 
                 # Filter fill and out-of-range values then scale.
-                data = self.raster.ReadAsArray(col, row, size, size)
+                data = a[col:col+tile_size,row:row+tile_size]
 
-                # Calculate projection system coordinates. Do not use XML
-                # or MTL values: they are NOT correct!!
-                # ux, uy = upper x and y
-                # ox, oy = offset w-e and n-s
-                # rx, ry = raster size, ignored.
-                #
-                # This is the right order, even though it seems strange. It is
-                # expected that oy is negative... and that ux and uy are multiples
-                # of the tiling grid (30*100 = strides of 3,000)
-                #
-                ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
                 tx, ty = ux+col*int(ox), uy+row*int(oy)
 
                 # Build a dict with relevant fields
@@ -75,6 +92,66 @@ class Band:
                 obj['data_shape'] = data.shape
                 yield obj
 
+
+    def misfit(self, tile_size, pixel_size):
+        """Check alignment between the raster tile grid.
+
+        This will raise an IngestInputException of the raster pixel size
+        and tile pixel size do not match or if the upper-left pixel coordinate
+        is not a multiple of the tile grid's pixel size. In this case, a
+        raster cannot be "framed" with not data to align it to the tile grid.
+
+        :param tile_size: pixel width (and height)
+        :type tile_size: int
+        :param pixel_size: projection system units per pixel (e.g. 30 meters)
+        :type pixel_size: int
+        :returns: True or False
+        """
+        ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
+        width, height = self.raster.RasterXSize, self.raster.RasterYSize
+        grid = tile_size * pixel_size
+
+        # The pixel size of the raster must match the target's tile pixel
+        # size, otherwise a tile will contain data for an area that is either
+        # too big or too small.
+        if (abs(ox) != pixel_size) or (abs(oy) != pixel_size):
+            msg = """band {0} input raster pixel sizes ({1},{2}) do not match tile pixel size ({3})"""
+            params = (self.name, ox, oy, pixel_size)
+            raise errors.IngestInputException(msg.format(*params))
+
+        # The upper left of the raster must be a multiple of the pixel size
+        # otherwise pixels "straddle" between two pixels on the tile grid.
+        if (ux % pixel_size) or (uy % pixel_size):
+            msg = "band {0} upper left coordinate ({1},{2}) must be an even multiple of pixel_size ({3})"
+            msg = textwrap.dedent(msg)
+            params = (self.name, ux, uy, pixel_size)
+            raise errors.IngestInputException(msg.format(*params))
+
+        # If the upper-left point does not divide evenly, then it is offset.
+        # Our previous tests ensure that it is safe to frame the data in order
+        # to align it to the tile grid.
+        if (ux % grid) or (uy % grid):
+            return True
+
+        # If the raster's width or height is different than the tile size, then
+        # it is a misfit that can be fixed.
+        elif (width % tile_size) or (height % tile_size):
+            return True
+
+        # if you get here, then you know the raster grid fits perfectly.
+        else:
+            return False
+
+
+    def free(self):
+        """Remove raster data to reduce consumed memory.
+
+        Bands can be several hundred megabytes and opening all of them during
+        processing them can bring a memory constrained machine to it's knees.
+        """
+        self._raster = None
+
+
     @property
     def tile_count(self, size=100):
         return int((self.raster.RasterXSize/size)*(self.raster.RasterYSize/size))
@@ -87,62 +164,100 @@ class Band:
             self._raster = gdal.Open(self.path)
             return self._raster
 
-    def free(self):
-        """Remove raster data to reduce consumed memory.
-
-        Bands can be several hundred megabytes and opening all of them during
-        processing them can bring a memory constrained machine to it's knees.
-        """
-        self._raster = None
-
     #
     # Simple properties extracted from XML with some basic checking
     #
 
     @property
     def name(self):
-        """Get name of this band.
+        return self._name
 
-        Unfortunately, the same band names aren't used for the same spectrums
-        between missions. There isn't much we can do here to fix that problem,
-        it's something that needs to be handled at query time.
-        """
-        return self.xml.get("name")
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
-    def rows(self):
-        return int(self.xml.get('nlines')),
+    def path(self):
+        return self._path
 
-    @property
-    def cols(self):
-        return int(self.xml.get('nsamps')),
+    @path.setter
+    def path(self, value):
+        self._path = value
 
     @property
     def fill(self):
-        fill = self.xml.get('fill_value')
-        if fill is not None:
-            return int(self.xml.get('fill_value'))
+        return self._fill
+
+    @fill.setter
+    def fill(self, value):
+        self._fill = value
 
     @property
     def valid_range(self):
-        if not hasattr(self, '_valid_range'):
-            vre = self.xml.find('valid_range')
-            if vre is not None:
-                min = int(vre.get('min'))
-                max = int(vre.get('max'))
-                self._valid_range = range(min, max)
-            else:
-                return None
-        return (self._valid_range.start, self._valid_range.stop)
+        if self._valid_range:
+            return (self._valid_range.start, self._valid_range.stop)
+        else:
+            return None
 
-    @property
-    def pixel_size(self):
-        return self.xml.find('pixel_size')
+    @valid_range.setter
+    def valid_range(self, value):
+        self._valid_range = value
 
     @property
     def scale(self):
-        scale = self.xml.get('scale_factor')
-        if scale is not None:
-            return float(scale)
+        return self._scale
+
+    @scale.setter
+    def scale(self, value):
+        self._scale = value
+
+    @property
+    def scene(self):
+        return self._scene
+
+    @scene.setter
+    def scene(self, value):
+        self._scene = value
+
+    def from_xml(xml, scene):
+        """Generate a Band object using metadata contained in the given xml"""
+
+        # This is the name of the band itself. Unfortunately the same name is
+        # used for different spectra between missions... so we need to figure
+        # out how to handle that potential problem at some point.
+        name_attr = xml.get("name")
+        if name_attr is not None:
+            name = name_attr
         else:
-            return 1.0  # is this ok for a default value?
+            name = None
+
+        # The band is referenced in the metadata relative to whatever
+        # directory contains the XML metadata. Construct a path...
+        path_element = xml.find("file_name")
+        if path_element is not None:
+            path = os.path.join(scene.dirpath, path_element.text)
+        else:
+            path = None
+
+        fill_element = xml.get('fill_value')
+        if fill_element is not None:
+            fill = int(xml.get('fill_value'))
+        else:
+            fill = None
+
+        vr_element = xml.find('valid_range')
+        if vr_element is not None:
+            min = int(vr_element.get('min'))
+            max = int(vr_element.get('max'))
+            vr = range(min, max)
+        else:
+            vr = None
+
+        scale_element = xml.get('scale_factor')
+        if scale_element is not None:
+            scale = float(scale_element)
+        else:
+            scale = None
+
+        return Band(scene=scene, name=name, path=path, fill=fill, valid_range=vr, scale=scale)
+

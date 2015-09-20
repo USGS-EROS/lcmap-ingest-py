@@ -68,7 +68,7 @@ class Scene:
         else:
             self._bands = []
             for el in self.xml.find_all('band'):
-                self._bands.append(Band(el, self))
+                self._bands.append(Band.from_xml(el, self))
             return self._bands
 
     @property
