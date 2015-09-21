@@ -36,8 +36,12 @@ class Band:
         self.valid_range = valid_range
         self.scale = scale
 
+    #
+    # TODO:
+    # Check pixel size and offset constraints.
+    #
 
-    def tiles(self, tile_size, pixel_size, offset_x=0, offset_y=0, **kwargs):
+    def tiles(self, tile_size, pixel_size, **kwargs):
         """Generate tiles (as a generator)
 
         Please note that the x and y properties of the yielded object are
@@ -59,10 +63,10 @@ class Band:
         # expected that oy is negative... and that ux and uy are multiples
         # of the tiling grid (30*100 = strides of 3,000)
         #
-        ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
+        ux, ox, rx, uy, ry, oy = self.raster.GetGeoTransform()
 
-        if self.misfit(tile_size, pixel_size, offset_x, offset_y):
-            a, ux, uy = util.frame_raster(self.raster, tile_size, self.fill, offset_x, offset_y)
+        if self.misfit(tile_size, pixel_size):
+            a, ux, uy = util.frame_raster(self.raster, tile_size, self.fill)
         else:
             a = np.array(self.raster.ReadAsArray())
 
@@ -91,13 +95,13 @@ class Band:
                 yield obj
 
 
-    def misfit(self, tile_size, pixel_size, offset_x=0, offset_y=0):
+    def misfit(self, tile_size, pixel_size):
         """Check alignment between the raster tile grid.
 
-        This will raise an IngestInputException of the raster pixel size
-        and tile pixel size do not match or if the upper-left pixel coordinate
-        is not a multiple of the tile grid's pixel size. In this case, a
-        raster cannot be "framed" with not data to align it to the tile grid.
+        This will raise an IngestInputException if the raster pixel size and tile
+        pixel size do not match or if the upper-left pixel coordinate is not a
+        multiple of the tile grid's pixel size. In this case, a raster cannot be
+        "framed" with not data to align it to the tile grid.
 
         :param tile_size: pixel width (and height)
         :type tile_size: int
@@ -109,6 +113,8 @@ class Band:
         width, height = self.raster.RasterXSize, self.raster.RasterYSize
         grid_x = tile_size * pixel_size
         grid_y = tile_size * pixel_size
+        offset_x = ux % ox
+        offset_y = uy % oy
 
         # The pixel size of the raster must match the target's tile pixel
         # size, otherwise a tile will contain data for an area that is either
