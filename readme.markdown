@@ -11,18 +11,35 @@ For questions regarding this source code, please contact the Landsat Contact Us 
 and specify USGS LCMAP in the "Regarding" section. https://landsat.usgs.gov/contactus.php
 
 
-## Example Usage
+## Ingest Usage
+
+Ingest takes an ESPA scene archive and saves tiles to a Cassandra database.
+Create a .env file to specify your database configuration parameters.
+
+### Basic
+
+Ingest a single file, logging all output to standard out.
+
+```
+python ingest /data/Landsat/some-scene.tar.gz
+```
+
+You can run ingest in parallel on groups of files, logging all output to a file,
+using a temporary directory of your choice to hold decompressed scenes.
+
+### Advanced
 
 ```
 export TEMP=/data/tmp
-nohup python ingest.py "/data/Landsat/*045026*" > 045026.log &
-nohup python ingest.py "/data/Landsat/*045027*" > 045027.log &
-nohup python ingest.py "/data/Landsat/*045028*" > 045028.log &
-nohup python ingest.py "/data/Landsat/*045029*" > 045029.log &
-nohup python ingest.py "/data/Landsat/*046026*" > 046026.log &
-nohup python ingest.py "/data/Landsat/*046027*" > 046027.log &
-nohup python ingest.py "/data/Landsat/*046028*" > 046028.log &
-nohup python ingest.py "/data/Landsat/*046029*" > 046029.log &
+mkdir
+nohup python ingest "/data/Landsat/*045026*" > logs/045026.log &
+nohup python ingest "/data/Landsat/*045027*" > logs/045027.log &
+nohup python ingest "/data/Landsat/*045028*" > logs/045028.log &
+nohup python ingest "/data/Landsat/*045029*" > logs/045029.log &
+nohup python ingest "/data/Landsat/*046026*" > logs/046026.log &
+nohup python ingest "/data/Landsat/*046027*" > logs/046027.log &
+nohup python ingest "/data/Landsat/*046028*" > logs/046028.log &
+nohup python ingest "/data/Landsat/*046029*" > logs/046029.log &
 ```
 
 ## Installation
