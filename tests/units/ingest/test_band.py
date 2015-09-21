@@ -102,6 +102,13 @@ class TestBand(unittest.TestCase):
             self.assertEqual(len(t), 1)
 
     def test_aligned_tile_with_different_pixel_size(self):
-        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_15px.tif")
-        t = [t for t in band.tiles(tile_size=10, pixel_size=15)]
+        band = self.build_band("tests/data/tile_5x5/offset_0x10_0y20_30px.tif")
+        t = [t for t in band.tiles(tile_size=10, pixel_size=30, offset_x=10, offset_y=20)]
         self.assertEqual(len(t), 1)
+
+    def test_aligned_tile_with_different_pixel_size_ux(self):
+        band = self.build_band("tests/data/tile_5x5/offset_0x10_0y20_30px.tif")
+        ts = [t for t in band.tiles(tile_size=2, pixel_size=30, offset_x=10, offset_y=20)]
+        self.assertEqual(ts[0]['x'], 3010)
+        self.assertEqual(ts[0]['y'], 3020)
+        self.assertEqual(len(ts), 9)

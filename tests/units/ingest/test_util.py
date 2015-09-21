@@ -10,6 +10,31 @@ class TestUtil(unittest.TestCase):
     # tempted to move the last part of the framing tests into it's own function
     # but then I'd have to test-the-tests... ;)
 
+    def test_snap_simple(self):
+        x, y = u.snap(0, 0)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 0)
+
+    def test_snap_simple_02(self):
+        x, y = u.snap(1, 1)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 3000)
+
+    def test_snap_simple_03(self):
+        x, y = u.snap(-1, 1)
+        self.assertEqual(x, -3000)
+        self.assertEqual(y, 3000)
+
+    def test_snap_realistic(self):
+        x, y = u.snap(-2264999, 3128999)
+        self.assertEqual(x, -2265000)
+        self.assertEqual(y,  3129000)
+
+    def test_snap_with_offset(self):
+        x, y = u.snap(-2265000, 3129000, offset_y=20)
+        self.assertEqual(x, -2265000)
+        self.assertEqual(y,  3129020)
+
     def test_frame_small_fits_in_one_tile(self):
         """Array is too small but fits entirely in one tile."""
         a = np.array(range(1, 10))

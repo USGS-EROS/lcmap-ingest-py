@@ -47,4 +47,7 @@ def make_geotiffs():
     # this tiff is 0 grid units off along the x axis and 3 units off along the y axis.
     create("tests/data/tile_5x5/offset_0x_0y_15px.tif", a, tile_grid, tile_grid, 15)
 
+    # this tiff is 0 grid units off along the x axis and 3 units off along the y axis.
+    create("tests/data/tile_5x5/offset_0x10_0y20_30px.tif", a, tile_grid+10, tile_grid+20, 30)
+
 make_geotiffs()

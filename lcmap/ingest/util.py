@@ -18,12 +18,12 @@ import numpy as np
 epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
 
-def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30):
+def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
     """Convert an x/y to the nearest grid coordinate."""
     grid_x = tile_size * pixel_x
     grid_y = tile_size * pixel_y
-    sx = math.floor(x / grid_x) * grid_x
-    sy = math.ceil(y / grid_x) * grid_y
+    sx = math.floor((x-offset_x) / grid_x) * grid_x + offset_x
+    sy = math.ceil((y-offset_y) / grid_y) * grid_y + offset_y
     return sx, sy
 
 
@@ -121,7 +121,7 @@ def frame(original, ux=0, uy=0, tx=100, ty=100, fill=0):
 
     return framed
 
-def frame_raster(raster, tile_size, fill):
+def frame_raster(raster, tile_size, fill, offset_x=0, offset_y=0):
     """Create a tile-grid aligned array from a GDAL raster.
 
     This will return an array padded with the fill value and the upper-left
@@ -140,6 +140,8 @@ def frame_raster(raster, tile_size, fill):
     framed = frame(original, rx, ry, tx=tile_size, ty=tile_size, fill=fill)
 
     # The new upper left point in the coordinate system after padding.
-    cx, cy = snap(ux, uy, tile_size=tile_size,  pixel_x=ox, pixel_y=oy)
+    cx, cy = snap(ux, uy, tile_size=tile_size,
+                  pixel_x=ox, pixel_y=oy,
+                  offset_x=offset_x, offset_y=offset_y)
 
     return framed, cx, cy
