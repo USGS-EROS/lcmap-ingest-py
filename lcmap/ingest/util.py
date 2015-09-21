@@ -15,16 +15,31 @@ import pyproj
 import math
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
 
-def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30):
-    """Convert an x/y to the nearest grid coordinate."""
+def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
+    """Convert an x/y to the nearest upper left grid coordinate.
+
+    Suppose a projection system with 30 meter pixels. If the upper-left coordinate
+    for a pixel is x:45, y:50 then it has an offset_x of 15 and an offset_y of 20.
+
+    :param x: projection system x coordinate 
+    :param y: projection system y coordinate
+    :param tile_size: pixel width of a tile
+    :param pixel_x: width of a pixel in projection system units
+    :param pixel_y: height of a pixel in projection system units
+    :param offset_x: e-w offset of pixel's west/left edge from projection grid
+    :param offset_y: n-s offset of pixel's north/top edge from projection grid
+    """
     grid_x = tile_size * pixel_x
     grid_y = tile_size * pixel_y
-    sx = math.floor(x / grid_x) * grid_x
-    sy = math.ceil(y / grid_x) * grid_y
+    sx = math.floor((x-offset_x) / grid_x) * grid_x + offset_x
+    sy = math.ceil((y-offset_y) / grid_y) * grid_y + offset_y
     return sx, sy
 
 
@@ -97,14 +112,15 @@ def frame(original, ux=0, uy=0, tx=100, ty=100, fill=0):
     pass in raster grid upper left coordinates. See to_raster_grid() if you
     need to perform this conversion.
 
-    ux upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
-    uy upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
-    tx pixel width of tile
-    ty pixel height of tile
+    :param ux: upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
+    :param uy: upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
+    :param tx: pixel width of tile
+    :param ty: pixel height of tile
+    :param fill: value to fill framing space
     """
     ow, oh = original.shape
 
-    # calculate the x-offset
+    # calculate the x-offset -- what about the offset?
     x_off = abs(math.floor(ux / tx) * tx - ux)
     y_off = abs(math.floor(uy / ty) * ty - uy)
     # print(x_off,ow,y_off,oh)
@@ -132,6 +148,9 @@ def frame_raster(raster, tile_size, fill):
     original = np.array(raster.ReadAsArray())
 
     ux, ox, _, uy, _, oy = raster.GetGeoTransform()
+    offset_x = ux % abs(ox)
+    offset_y = uy % abs(oy)
+    logger.debug("frame_raster: {0}/{1}".format(offset_x, offset_y))
 
     # The column and row of the pixel in terms of a raster grid. Suppose we
     # have 100 meter pixels projected in EPSG:5070. Every 100 meter change
@@ -142,6 +161,8 @@ def frame_raster(raster, tile_size, fill):
     framed = frame(original, rx, ry, tx=tile_size, ty=tile_size, fill=fill)
 
     # The new upper left point in the coordinate system after padding.
-    cx, cy = snap(ux, uy, tile_size=tile_size,  pixel_x=ox, pixel_y=oy)
+    cx, cy = snap(ux, uy, tile_size=tile_size,
+                  pixel_x=ox, pixel_y=oy,
+                  offset_x=offset_x, offset_y=offset_y)
 
     return framed, cx, cy

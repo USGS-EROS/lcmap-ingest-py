@@ -82,20 +82,19 @@ def temporarily_expanded(path):
         into.cleanup()
 
 
-def ingest(scene, tile_size, pixel_size):
+def ingest(scene, **kwargs):
     """Tile and save all available bands in scene."""
     band_count = len(scene.bands)
     for idx, band in enumerate(scene.bands):
         progress = "{0} [{2:0>2}/{3:0>2}] {1:<20} "
-        logger.info(
-            progress.format(scene.name, band.name, idx + 1, band_count))
-        for tile in band.tiles(tile_size=tile_size, pixel_size=pixel_size):
+        logger.info(progress.format(scene.name, band.name, idx + 1, band_count))
+        for tile in band.tiles(**kwargs):
             if not np.all(tile['data'] == band.fill):
                 lcmap.db.tile.save(**tile)
         band.free()
 
 
-def expand_and_ingest(file, tile_size, pixel_size, file_idx=0, file_count=0):
+def expand_and_ingest(file, file_idx, file_count, **kwargs):
     """Multiprocessing friendly tiling function."""
     try:
         with temporarily_expanded(file) as scene_path:
@@ -103,33 +102,31 @@ def expand_and_ingest(file, tile_size, pixel_size, file_idx=0, file_count=0):
             progress = "{0} [{1:0>3}/{2:0>3}] ingest started from {3}"
             logger.info(
                 progress.format(scene.name, file_idx, file_count, scene_path))
-            ingest(scene, tile_size, pixel_size)
+            ingest(scene, **kwargs)
             logger.info("{0} ingest finished".format(scene.name))
     except Exception as err:
         logger.error("ingest failed {0}: {1}".format(file, err))
-
-
-def meow(**kwargs):
-    print(kwargs)
 
 
 @click.command()
 @click.argument("source",     default="data/*.tar.gz")
 @click.option("--tile-size",  default=100)
 @click.option("--pixel-size", default=30)
-def process(source, tile_size, pixel_size):
+def process(source, **kwargs):
     """Ingest multiple scenes."""
 
     logger.info("processing started")
+
+    logger.info(kwargs)
 
     # Create a sorted list of files, sorting helps keep track of progress
     # in addition to the file total and enumeration index.
     files = glob.glob(source)
     files.sort()
+    total = len(files)
 
     for idx, file in enumerate(files):
-        expand_and_ingest(file, file_idx=idx + 1, file_count=len(files),
-                          tile_size=tile_size, pixel_size=pixel_size)
+        expand_and_ingest(file, idx+1, total, **kwargs)
 
     logger.info("processing complete")
 

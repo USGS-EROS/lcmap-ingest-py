@@ -36,8 +36,12 @@ class Band:
         self.valid_range = valid_range
         self.scale = scale
 
+    #
+    # TODO:
+    # Check pixel size and offset constraints.
+    #
 
-    def tiles(self, tile_size, pixel_size):
+    def tiles(self, tile_size, pixel_size, **kwargs):
         """Generate tiles (as a generator)
 
         Please note that the x and y properties of the yielded object are
@@ -59,13 +63,11 @@ class Band:
         # expected that oy is negative... and that ux and uy are multiples
         # of the tiling grid (30*100 = strides of 3,000)
         #
-        ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
+        ux, ox, rx, uy, ry, oy = self.raster.GetGeoTransform()
 
         if self.misfit(tile_size, pixel_size):
-            logger.debug("raster misfit")
             a, ux, uy = util.frame_raster(self.raster, tile_size, self.fill)
         else:
-            logger.debug("raster aligned")
             a = np.array(self.raster.ReadAsArray())
 
         rows, cols = a.shape
@@ -96,10 +98,10 @@ class Band:
     def misfit(self, tile_size, pixel_size):
         """Check alignment between the raster tile grid.
 
-        This will raise an IngestInputException of the raster pixel size
-        and tile pixel size do not match or if the upper-left pixel coordinate
-        is not a multiple of the tile grid's pixel size. In this case, a
-        raster cannot be "framed" with not data to align it to the tile grid.
+        This will raise an IngestInputException if the raster pixel size and tile
+        pixel size do not match or if the upper-left pixel coordinate is not a
+        multiple of the tile grid's pixel size. In this case, a raster cannot be
+        "framed" with not data to align it to the tile grid.
 
         :param tile_size: pixel width (and height)
         :type tile_size: int
@@ -109,7 +111,10 @@ class Band:
         """
         ux,ox,rx,uy,ry,oy = self.raster.GetGeoTransform()
         width, height = self.raster.RasterXSize, self.raster.RasterYSize
-        grid = tile_size * pixel_size
+        grid_x = tile_size * pixel_size
+        grid_y = tile_size * pixel_size
+        offset_x = ux % ox
+        offset_y = uy % oy
 
         # The pixel size of the raster must match the target's tile pixel
         # size, otherwise a tile will contain data for an area that is either
@@ -121,16 +126,20 @@ class Band:
 
         # The upper left of the raster must be a multiple of the pixel size
         # otherwise pixels "straddle" between two pixels on the tile grid.
-        if (ux % pixel_size) or (uy % pixel_size):
-            msg = "band {0} upper left coordinate ({1},{2}) must be an even multiple of pixel_size ({3})"
-            msg = textwrap.dedent(msg)
-            params = (self.name, ux, uy, pixel_size)
+        if (ux-offset_x) % pixel_size:
+            msg = "band {0} upper left x coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            params = (self.name, ux, pixel_size, offset_x)
+            raise errors.IngestInputException(msg.format(*params))
+
+        if (uy-offset_y) % pixel_size:
+            msg = "band {0} upper left y coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            params = (self.name, uy, pixel_size, offset_y)
             raise errors.IngestInputException(msg.format(*params))
 
         # If the upper-left point does not divide evenly, then it is offset.
         # Our previous tests ensure that it is safe to frame the data in order
         # to align it to the tile grid.
-        if (ux % grid) or (uy % grid):
+        if (ux % grid_x) or (uy % grid_y):
             return True
 
         # If the raster's width or height is different than the tile size, then

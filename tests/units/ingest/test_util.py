@@ -10,6 +10,110 @@ class TestUtil(unittest.TestCase):
     # tempted to move the last part of the framing tests into it's own function
     # but then I'd have to test-the-tests... ;)
 
+
+    #
+    # Snapping y-coordinate test
+    #
+
+    def test_snap_y_simple(self):
+        x, y = u.snap(0, 0)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 0)
+
+    def test_snap_y_simple_02(self):
+        x, y = u.snap(0, 1500)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 3000)
+
+    def test_snap_y_simple_03(self):
+        x, y = u.snap(0, 3456)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 6000)
+
+    def test_snap_y_simple_04(self):
+        x, y = u.snap(0, -1500)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 0)
+
+    def test_snap_y_simple_05(self):
+        x, y = u.snap(0, -3456)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, -3000)
+
+    def test_snap_y_offset_01(self):
+        x, y = u.snap(0, 9, offset_y=10)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 10)
+
+    def test_snap_y_offset_02(self):
+        x, y = u.snap(0, 10, offset_y=10)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 3010)
+
+    def test_snap_y_offset_02(self):
+        x, y = u.snap(0, 11, offset_y=10)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 3010)
+
+    def test_snap_y_offset_03(self):
+        x, y = u.snap(0, 500, offset_y=100)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 3100)
+
+    #
+    # Snapping x-coordinate test
+    #
+
+    def test_snap_x_simple(self):
+        x, y = u.snap(0, 0)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_simple_02(self):
+        x, y = u.snap(1500, 0)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_simple_03(self):
+        x, y = u.snap(3500, 0)
+        self.assertEqual(x, 3000)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_simple_04(self):
+        x, y = u.snap(-1500, 0)
+        self.assertEqual(x, -3000)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_offset_01(self):
+        x, y = u.snap(0, 0, offset_x=10)
+        self.assertEqual(x, -2990)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_offset_02(self):
+        x, y = u.snap(3000, 3000, offset_x=-10)
+        self.assertEqual(x,  2990)
+        self.assertEqual(y,  3000)
+
+    def test_snap_x_offset_03(self):
+        x, y = u.snap(11, 0, offset_x=10)
+        self.assertEqual(x, 10)
+        self.assertEqual(y, 0)
+
+    def test_snap_x_offset_04(self):
+        x, y = u.snap(500, 0, offset_x=100)
+        self.assertEqual(x, 100)
+        self.assertEqual(y, 0)
+
+    def test_snap_realistic(self):
+        x, y = u.snap(-2264999, 3128999)
+        self.assertEqual(x, -2265000)
+        self.assertEqual(y,  3129000)
+
+    def test_snap_with_offset(self):
+        x, y = u.snap(-2265000, 3129000, offset_y=10)
+        self.assertEqual(x, -2265000)
+        self.assertEqual(y,  3129010)
+
     def test_frame_small_fits_in_one_tile(self):
         """Array is too small but fits entirely in one tile."""
         a = np.array(range(1, 10))

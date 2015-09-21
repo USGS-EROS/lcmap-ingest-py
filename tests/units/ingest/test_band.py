@@ -31,19 +31,19 @@ class TestBand(unittest.TestCase):
         return Band(**args)
 
     def test_aligned_tile_not_a_misfit_when_it_fits_exactly(self):
-        band = self.build_band("tests/data/tile_5x5/offset_0x_0y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_30px.tif")
         self.assertFalse(band.misfit(tile_size=5, pixel_size=30))
 
     def test_aligned_tile_misfits_when_it_is_small(self):
-        band = self.build_band("tests/data/tile_5x5/offset_0x_0y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_30px.tif")
         self.assertTrue(band.misfit(tile_size=10, pixel_size=30))
 
     def test_aligned_tile_misfits_when_it_is_too_big(self):
-        band = self.build_band("tests/data/tile_5x5/offset_0x_0y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_30px.tif")
         self.assertTrue(band.misfit(tile_size=4, pixel_size=30))
 
     def test_offset_tile(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         self.assertTrue(band.misfit(tile_size=5, pixel_size=30))
 
     def test_offset_tile(self):
@@ -57,35 +57,64 @@ class TestBand(unittest.TestCase):
         #   7,8,9
         # ...the 3,6,7,8,9 are lost!
         #
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         self.assertTrue(band.misfit(tile_size=10, pixel_size=30))
 
     def test_offset_tile_into_1x1(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=1, pixel_size=30)]
         self.assertEqual(len(t), 25)
 
     def test_offset_tile_into_2x2(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=2, pixel_size=30)]
         self.assertEqual(len(t), 9)
 
     def test_offset_tile_into_3x3(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=3, pixel_size=30)]
         self.assertEqual(len(t), 4)
 
     def test_offset_tile_into_4x4(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=4, pixel_size=30)]
         self.assertEqual(len(t), 4)
 
     def test_offset_tile_into_5x5(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=5, pixel_size=30)]
         self.assertEqual(len(t), 4)
 
     def test_offset_tile_into_10x10(self):
-        band = self.build_band("tests/data/tile_5x5/offset_2x_2y.tif")
+        band = self.build_band("tests/data/tile_5x5/offset_2x_2y_30px.tif")
         t = [t for t in band.tiles(tile_size=10, pixel_size=30)]
         self.assertEqual(len(t), 1)
+
+    def test_aligned_tile_with_right_pixel_size(self):
+        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_30px.tif")
+        t = [t for t in band.tiles(tile_size=10, pixel_size=30)]
+        self.assertEqual(len(t), 1)
+
+    def test_aligned_tile_with_wrong_pixel_size(self):
+        band = self.build_band("tests/data/tile_5x5/offset_0x_0y_15px.tif")
+        with self.assertRaises(IngestInputException):
+            t = [t for t in band.tiles(tile_size=10, pixel_size=30)]
+            self.assertEqual(len(t), 1)
+
+    def test_aligned_tile_with_different_pixel_size(self):
+        band = self.build_band("tests/data/tile_5x5/offset_0x10_0y20_30px.tif")
+        ux,_,_,uy,_,_ = band.raster.GetGeoTransform()
+        ts = [t for t in band.tiles(tile_size=10, pixel_size=30)]
+        self.assertEqual(ts[0]['x'], ux)
+        self.assertEqual(ts[0]['y'], uy)
+        self.assertEqual(len(ts), 1)
+
+    def test_aligned_tile_with_different_pixel_size_ux(self):
+        band = self.build_band("tests/data/tile_5x5/offset_0x10_0y20_30px.tif")
+        ux,_,_,uy,_,_ = band.raster.GetGeoTransform()
+        ts = [t for t in band.tiles(tile_size=2, pixel_size=30)]
+        self.assertTrue(band.misfit(tile_size=2, pixel_size=30))
+        print([t['y'] for t in ts])
+        self.assertEqual(ts[0]['x'], ux)
+        self.assertEqual(ts[0]['y'], uy)
+        self.assertEqual(len(ts), 9)
