@@ -1,8 +1,7 @@
 from os import environ
 from os.path import join, dirname
 from dotenv import load_dotenv
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+load_dotenv('.env')
 
 CASSANDRA_HOSTS = environ.get('CASSANDRA_HOSTS', 'localhost').split(',')
 CASSANDRA_PORT = int(environ.get('CASSANDRA_PORT', 9042))
