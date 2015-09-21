@@ -72,10 +72,10 @@ class Band:
 
         rows, cols = a.shape
         for row in range(0, rows, tile_size):
-            for col in range(0, rows, tile_size):
+            for col in range(0, cols, tile_size):
 
                 # Filter fill and out-of-range values then scale.
-                data = a[col:col+tile_size,row:row+tile_size]
+                data = a[row:row+tile_size, col:col+tile_size]
 
                 tx, ty = ux+col*int(ox), uy+row*int(oy)
 
