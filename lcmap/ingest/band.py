@@ -120,9 +120,14 @@ class Band:
 
         # The upper left of the raster must be a multiple of the pixel size
         # otherwise pixels "straddle" between two pixels on the tile grid.
-        if (ux+offset_x) % pixel_size or (uy+offset_y) % pixel_size:
-            msg = "band {0} upper left coordinate ({1},{2}) must be an even multiple of pixel_size ({3}+{4})"
-            params = (self.name, ux, uy, pixel_size, offset_y)
+        if (ux-offset_x) % pixel_size:
+            msg = "band {0} upper left x coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            params = (self.name, ux, pixel_size, offset_x)
+            raise errors.IngestInputException(msg.format(*params))
+
+        if (uy-offset_y) % pixel_size:
+            msg = "band {0} upper left y coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            params = (self.name, uy, pixel_size, offset_y)
             raise errors.IngestInputException(msg.format(*params))
 
         # If the upper-left point does not divide evenly, then it is offset.

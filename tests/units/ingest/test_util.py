@@ -33,7 +33,7 @@ class TestUtil(unittest.TestCase):
     def test_snap_with_offset(self):
         x, y = u.snap(-2265000, 3129000, offset_y=20)
         self.assertEqual(x, -2265000)
-        self.assertEqual(y,  3129020)
+        self.assertEqual(y,  3131980)
 
     def test_frame_small_fits_in_one_tile(self):
         """Array is too small but fits entirely in one tile."""

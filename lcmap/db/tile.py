@@ -42,8 +42,7 @@ def find(x, y, layer, t1, t2):
     logger.debug("find <%s,%s> (%s) @ %s-%s." % (layer, x, y, t1, t2))
     t1 = datetime.strptime(t1, "%Y-%m-%d")
     t2 = datetime.strptime(t2, "%Y-%m-%d")
-    sx, sy = util.snap(x, y)
-    parameters = (sx, sy, layer, t1, t2)
+    parameters = (x, y, layer, t1, t2)
     results = session.execute(FIND, parameters)
     return results
 

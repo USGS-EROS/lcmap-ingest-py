@@ -22,8 +22,8 @@ def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
     """Convert an x/y to the nearest grid coordinate."""
     grid_x = tile_size * pixel_x
     grid_y = tile_size * pixel_y
-    sx = math.floor((x-offset_x) / grid_x) * grid_x + offset_x
-    sy = math.ceil((y-offset_y) / grid_y) * grid_y + offset_y
+    sx = math.floor((x+offset_x) / grid_x) * grid_x - offset_x
+    sy = math.ceil((y+offset_y) / grid_y) * grid_y - offset_y
     return sx, sy
 
 
