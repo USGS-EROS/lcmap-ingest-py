@@ -33,17 +33,19 @@ FIND_CQL = """SELECT * FROM epsg_5070 WHERE
 FIND = session.prepare(FIND_CQL)
 
 
-def find(x, y, layer, t1, t2):
+def find(x, y, layers, t1, t2):
     """Find a tile containing x, y.
 
     This does not post-process results. It returns a list of rows results
     that can be further processed. This means that the data blob isn't even
     a usable array.
     """
-    logger.debug("find <%s,%s> (%s) @ %s-%s." % (layer, x, y, t1, t2))
+    logger.debug("find <%s,%s> (%s) @ %s-%s." % (layers, x, y, t1, t2))
     t1 = datetime.strptime(t1, "%Y-%m-%d")
     t2 = datetime.strptime(t2, "%Y-%m-%d")
-    parameters = (x, y, layer, t1, t2)
+    if isinstance(layers, str):
+        layers = [layers]
+    parameters = (x, y, layers, t1, t2)
     results = session.execute(FIND, parameters)
     return results
 
@@ -55,16 +57,8 @@ def find_area(x1, y1, x2, y2, layers, t1, t2, grid=30 * 100):
     low-level function that can be wrapped with mosaic and subsetting code
     to further ease making results more usable.
     """
-    # Find the tile coordinates containing upper left...
-    ux, uy = util.snap(x1, y1)
-    # ...and the lower right points
-    lx, ly = util.snap(x2, y2)
-
-    # TODO - offset?  something must be wrong somewhere
-    x_offset = -600
-    y_offset = -200
-    xs = range(ux + x_offset, lx + x_offset, grid)
-    ys = range(uy + y_offset, ly + y_offset, -1 * grid)
+    xs = range(x1, x2, grid)
+    ys = range(y1, y2, -grid)
 
     # We only support one basic date format...
     dtfmt = "%Y-%m-%d"
