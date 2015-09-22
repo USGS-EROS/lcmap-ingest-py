@@ -54,12 +54,8 @@ def find_area(x1, y1, x2, y2, layer, t1, t2, grid=30 * 100):
     low-level function that can be wrapped with mosaic and subsetting code
     to further ease making results more usable.
     """
-    # Find the tile coordinates containing upper left...
-    ux, uy = util.snap(x1, y1)
-    # ...and the lower right points
-    lx, ly = util.snap(x2, y2)
-    xs = range(ux, lx, grid)
-    ys = range(uy, ly, grid)
+    xs = range(x1, y1, grid)
+    ys = range(x2, y2, grid)
 
     # We only support one basic date format...
     dtfmt = "%Y-%m-%d"
