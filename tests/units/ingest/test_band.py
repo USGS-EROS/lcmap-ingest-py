@@ -107,14 +107,13 @@ class TestBand(unittest.TestCase):
         ts = [t for t in band.tiles(tile_size=10, pixel_size=30)]
         self.assertEqual(ts[0]['x'], ux)
         self.assertEqual(ts[0]['y'], uy)
-        self.assertEqual(len(ts), 1)
+        self.assertEqual(len(ts), 2)
 
     def test_aligned_tile_with_different_pixel_size_ux(self):
         band = self.build_band("tests/data/tile_5x5/offset_0x10_0y20_30px.tif")
         ux,_,_,uy,_,_ = band.raster.GetGeoTransform()
-        ts = [t for t in band.tiles(tile_size=2, pixel_size=30)]
-        self.assertTrue(band.misfit(tile_size=2, pixel_size=30))
-        print([t['y'] for t in ts])
+        ts = [t for t in band.tiles(tile_size=3, pixel_size=30)]
+        self.assertTrue(band.misfit(tile_size=3, pixel_size=30))
         self.assertEqual(ts[0]['x'], ux)
         self.assertEqual(ts[0]['y'], uy)
-        self.assertEqual(len(ts), 9)
+        self.assertEqual(len(ts), 12)

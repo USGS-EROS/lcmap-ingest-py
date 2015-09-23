@@ -28,7 +28,7 @@ def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
     Suppose a projection system with 30 meter pixels. If the upper-left coordinate
     for a pixel is x:45, y:50 then it has an offset_x of 15 and an offset_y of 20.
 
-    :param x: projection system x coordinate 
+    :param x: projection system x coordinate
     :param y: projection system y coordinate
     :param tile_size: pixel width of a tile
     :param pixel_x: width of a pixel in projection system units
@@ -105,36 +105,35 @@ def extents(path, epsg=5070):
     return {'extent-in': i, 'extent-out': o}
 
 
-def frame(original, ux=0, uy=0, tx=100, ty=100, fill=0):
+def frame(original, gx=0, gy=0, tx=100, ty=100, fill=0):
     """Surround data not aligned to the tile grid with fill data.
 
     This function doesn't know anything about coordinate systems. You must
     pass in raster grid upper left coordinates. See to_raster_grid() if you
     need to perform this conversion.
 
-    :param ux: upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
-    :param uy: upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
+    :param gx: upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
+    :param gy: upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
     :param tx: pixel width of tile
     :param ty: pixel height of tile
     :param fill: value to fill framing space
     """
-    ow, oh = original.shape
+    # pay special attention, the shape of the raster is (rows, cols)
+    rows, cols = original.shape
 
-    # calculate the x-offset -- what about the offset?
-    x_off = abs(math.floor(ux / tx) * tx - ux)
-    y_off = abs(math.floor(uy / ty) * ty - uy)
-    # print(x_off,ow,y_off,oh)
+    # calculate the x-offset
+    x_off = abs(math.floor(gx / tx) * tx - gx)
+    y_off = abs(math.floor(gy / ty) * ty - gy)
 
     # determine how wide the new array needs to be
-    # bug. wrong.
-    x_size = math.ceil((x_off + ow) / tx) * tx
-    y_size = math.ceil((y_off + oh) / ty) * ty
+    x_size = math.ceil((x_off + cols) / tx) * tx
+    y_size = math.ceil((y_off + rows) / ty) * ty
 
     # prepare a new array that is the same type and properly filled
-    framed = np.full((x_size, y_size), fill, dtype=original.dtype)
+    framed = np.full((y_size, x_size), fill, dtype=original.dtype)
 
     # copy data from the original array
-    framed[x_off:x_off+ow, y_off:y_off+oh] = original
+    framed[y_off:y_off+rows, x_off:x_off+cols] = original
 
     return framed
 
@@ -148,21 +147,22 @@ def frame_raster(raster, tile_size, fill):
     original = np.array(raster.ReadAsArray())
 
     ux, ox, _, uy, _, oy = raster.GetGeoTransform()
-    offset_x = ux % abs(ox)
-    offset_y = uy % abs(oy)
-    logger.debug("frame_raster: {0}/{1}".format(offset_x, offset_y))
+    offset_x = ux % ox
+    offset_y = uy % oy
 
     # The column and row of the pixel in terms of a raster grid. Suppose we
     # have 100 meter pixels projected in EPSG:5070. Every 100 meter change
     # along an axis is 1 step in the raster grid.
-    rx, ry = int(ux / ox), int(uy / oy)
+    gx, gy = ux / ox, uy / oy
 
     # Don't forget to provide fill data...
-    framed = frame(original, rx, ry, tx=tile_size, ty=tile_size, fill=fill)
+    framed = frame(original, gx, gy, tx=tile_size, ty=tile_size, fill=fill)
 
     # The new upper left point in the coordinate system after padding.
     cx, cy = snap(ux, uy, tile_size=tile_size,
-                  pixel_x=ox, pixel_y=oy,
+                  pixel_x=ox, pixel_y=abs(oy),
                   offset_x=offset_x, offset_y=offset_y)
+
+    logger.debug("reframed raster ux: {0} -> {1}, uy: {2} -> {3}".format(ux, cx, uy, cy))
 
     return framed, cx, cy

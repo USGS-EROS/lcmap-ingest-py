@@ -123,7 +123,7 @@ class TestUtil(unittest.TestCase):
         expected_fills = 5 * 5 - 9
         expected_value = 9
 
-        f = u.frame(a, ux=1, uy=1, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=1, gy=1, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
@@ -133,11 +133,11 @@ class TestUtil(unittest.TestCase):
         a = np.array(range(1, 10))
         a.resize((3, 3))
 
-        expected_shape = (10, 5)
+        expected_shape = (5, 10)
         expected_fills = 5 * 10 - 9
         expected_value = 9
 
-        f = u.frame(a, ux=-1, uy=1, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=-1, gy=1, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
@@ -151,7 +151,7 @@ class TestUtil(unittest.TestCase):
         expected_fills = 10 * 10 - a.size
         expected_value = a.size
 
-        f = u.frame(a, ux=-1, uy=-1, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=-1, gy=-1, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
@@ -165,7 +165,7 @@ class TestUtil(unittest.TestCase):
         expected_fills = 10 * 5 - a.size
         expected_value = a.size
 
-        f = u.frame(a, ux=0, uy=0, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=0, gy=0, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
@@ -179,7 +179,7 @@ class TestUtil(unittest.TestCase):
         expected_fills = 10 * 10 - a.size
         expected_value = a.size
 
-        f = u.frame(a, ux=0, uy=0, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=0, gy=0, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
@@ -193,7 +193,7 @@ class TestUtil(unittest.TestCase):
         expected_fills = 15 * 15 - a.size
         expected_value = a.size
 
-        f = u.frame(a, ux=3, uy=3, tx=5, ty=5, fill=255)
+        f = u.frame(a, gx=3, gy=3, tx=5, ty=5, fill=255)
         self.assertEqual(f.shape, expected_shape)
         self.assertEqual(np.count_nonzero(f == 255), expected_fills)
         self.assertEqual(np.count_nonzero(f < 255), expected_value)
