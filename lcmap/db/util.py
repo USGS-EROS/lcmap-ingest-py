@@ -53,6 +53,12 @@ def meld(cube, grid=30 * 100):
     if df_in.empty:
         return
 
+    # get the max extent of the data
+    y_min, y_max = df_in.y.min(), df_in.y.max()
+    x_min, x_max = df_in.x.min(), df_in.x.max()
+    ys = range(y_max, y_min, -grid)
+    xs = range(x_min, x_max, grid)
+
     # get each of the unique gropus for the resulting dataframe
     grouped = [{'acquired': key[0], 'layer': key[1]} for key, group in df_in.groupby(['acquired', 'layer'])]
 
@@ -63,12 +69,8 @@ def meld(cube, grid=30 * 100):
         # select all of the source rows for the group
         source = df_in[(df_in.acquired == group['acquired']) & (df_in.layer == group['layer'])]
 
-        # stack the arrays horizontally and vertically
-        ys = source.y.unique()
-        y_data = np.vstack([np.hstack(source[source.y == y].data) for y in ys])
-
         # save the data to the group
-        group['data'] = y_data
+        group['data'] = _merge(source, ys, xs)
 
         # append the group to the result
         result.append(group)
@@ -76,3 +78,31 @@ def meld(cube, grid=30 * 100):
     # create a dataframe with the results so it's easier to select a portion of the data
     df = pd.DataFrame(result)
     return df.set_index(['acquired', 'layer'])
+
+
+def _merge(source, ys, xs, grid=30 * 100, size=100):
+    """
+    Take in all of the data for a single acquisition date and layer and stacke them horizontally
+    and vertically into a single array.  For any missing chunks, fill as NaN.
+    """
+    # create a filler to use in place of missing data
+    gap = np.empty([size, size])
+    gap.fill(np.nan)
+
+    # index the data frame for easier searching
+    df = source.set_index(['y', 'x'])
+
+    y_data = []
+    for y in ys:
+        x_data = []
+        for x in xs:
+            x_chunk = gap if (y, x) not in df.index else df.ix[y, x]['data']
+            x_data.append(x_chunk)
+
+        if len(x_data) > 0:
+            y_data.append(np.vstack(x_data))
+        else:
+            # fill the entire y if there is no x data
+            y_data.append(np.vstack([gap] * len(xs)))
+
+    return np.hstack(y_data)
