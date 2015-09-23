@@ -25,7 +25,7 @@ def as_array(row, size=30 * 100):
     return arr
 
 
-def meld(cube, grid=30 * 100):
+def meld(cube, grid=30 * 100, size=100):
 
     # trim out statements that did not return anything and reshape to only return the data rows
     rows = [row for result in cube if result[0] and len(result[1]) > 0 for row in result[1]]
@@ -70,7 +70,7 @@ def meld(cube, grid=30 * 100):
         source = df_in[(df_in.acquired == group['acquired']) & (df_in.layer == group['layer'])]
 
         # save the data to the group
-        group['data'] = _merge(source, ys, xs)
+        group['data'] = _merge(source, ys, xs, grid, size)
 
         # append the group to the result
         result.append(group)
@@ -80,7 +80,7 @@ def meld(cube, grid=30 * 100):
     return df.set_index(['acquired', 'layer'])
 
 
-def _merge(source, ys, xs, grid=30 * 100, size=100):
+def _merge(source, ys, xs, grid, size):
     """
     Take in all of the data for a single acquisition date and layer and stacke them horizontally
     and vertically into a single array.  For any missing chunks, fill as NaN.
