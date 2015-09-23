@@ -50,6 +50,8 @@ def meld(cube, grid=30 * 100):
 
     # create a dataframe to make it easier to select from the tiles
     df_in = pd.DataFrame(tiles)
+    if df_in.empty:
+        return
 
     # get each of the unique gropus for the resulting dataframe
     grouped = [{'acquired': key[0], 'layer': key[1]} for key, group in df_in.groupby(['acquired', 'layer'])]
@@ -72,4 +74,5 @@ def meld(cube, grid=30 * 100):
         result.append(group)
 
     # create a dataframe with the results so it's easier to select a portion of the data
-    return pd.DataFrame(result)
+    df = pd.DataFrame(result)
+    return df.set_index(['acquired', 'layer'])
