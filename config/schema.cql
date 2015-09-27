@@ -75,68 +75,68 @@ CREATE INDEX tile_groups_satellite ON lcmap.tile_groups (satellite);
 
 CREATE INDEX tile_groups_category ON lcmap.tile_groups (category);
 
-INSERT INTO lcmap.tile_groups(table_name, pixel_x, pixel_y, pixel_x_offset, pixel_y_offset, pixel_units, resample_method)
-VALUES ('epsg_5070', 30, -30, 0, 0, 'meters', 'nearest neighbor');
+INSERT INTO lcmap.tile_groups(table_name, tile_size, pixel_x, pixel_y, pixel_x_offset, pixel_y_offset, pixel_units, resample_method)
+VALUES ('epsg_5070', 256, 30, -30, 0, 0, 'meters', 'nearest neighbor');
 
 INSERT INTO lcmap.tile_groups(table_name, projection)
 VALUES ('epsg_5070', 'PROJCS["NAD83 / Conus Albers",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[1,1,-1,0,0,0,0],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["standard_parallel_1",29.5],PARAMETER["standard_parallel_2",45.5],PARAMETER["latitude_of_center",23],PARAMETER["longitude_of_center",-96],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["X",EAST],AXIS["Y",NORTH],AUTHORITY["EPSG","5070"]]');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 1 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 1 surface reflectance', 'LC8SR', 'band 1 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 1 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 2 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 2 surface reflectance', 'LC8SR', 'band 2 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 2 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 3 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 3 surface reflectance', 'LC8SR', 'band 3 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 3 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 4 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 4 surface reflectance', 'LC8SR', 'band 4 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 4 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 5 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 5 surface reflectance', 'LC8SR', 'band 5 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 5 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 6 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 6 surface reflectance', 'LC8SR', 'band 6 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 6 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:band 7 surface reflectance', 'sr_refl', 'image', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:band 7 surface reflectance', 'LC8SR', 'band 7 surface reflectance');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_scale, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_scale, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:band 7 surface reflectance', -9999, [-2000, 16000], 0.000100, 'int16', 'reflectance');
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8SR:surface reflectance cloud mask', 'sr_refl', 'qa', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8SR:surface reflectance cloud mask', 'LC8SR', 'surface reflectance cloud mask');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_type, data_units)
 VALUES ('epsg_5070', 'LC8SR:surface reflectance cloud mask', 0, NULL,'uint8', 'bitmap');
-INSERT INTO lcmap.tile_groups (table_name, band, class_values)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, class_values)
 VALUES ('epsg_5070',
         'LC8SR:surface reflectance cloud mask',
         { 0:'cirrus cloud',
@@ -148,13 +148,13 @@ VALUES ('epsg_5070',
           6:'unused',
           7:'internal test' });
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_band', 'cfmask', 'qa', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_band', 'LC8CFMASK', 'cfmask_band');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_type, data_units)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_band', 255, [0,4], 'uint8', 'quality/feature classification');
-INSERT INTO lcmap.tile_groups (table_name, band, class_values)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, class_values)
 VALUES ('epsg_5070',
         'LC8CFMASK:cfmask_band',
         { 0:'clear',
@@ -165,13 +165,13 @@ VALUES ('epsg_5070',
           255:'fill' });
 
 
-INSERT INTO lcmap.tile_groups (table_name, band, product, category, satellite, instrument)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, product, category, satellite, instrument)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_conf_band', 'cfmask', 'qa', 'LANDSAT_8', 'OLI_TIRS');
-INSERT INTO lcmap.tile_groups (table_name, band, short_name, long_name)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, short_name, long_name)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_conf_band', 'LC8CFMASK', 'cfmask_conf_band');
-INSERT INTO lcmap.tile_groups (table_name, band, data_fill, data_range, data_type, data_units)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, data_fill, data_range, data_type, data_units)
 VALUES ('epsg_5070', 'LC8CFMASK:cfmask_conf_band', 255, [0,3], 'uint8', 'quality/feature classification');
-INSERT INTO lcmap.tile_groups (table_name, band, class_values)
+INSERT INTO lcmap.tile_groups (table_name, layer_name, class_values)
 VALUES ('epsg_5070',
         'LC8CFMASK:cfmask_conf_band',
         { 0:'none',
@@ -181,3 +181,19 @@ VALUES ('epsg_5070',
           255: 'fill' });
 
 
+
+CREATE TABLE lcmap.scenes (
+    landsat_scene_id
+    processing_software_version
+    data_type
+    spacecraft_id
+    sensor_id
+    path
+    row
+    date_acquired
+    scene_center_time
+    cloud_cover
+    cloud_cover_land
+    image_quality_oli
+    image_quality_tirs
+);

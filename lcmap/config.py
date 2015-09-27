@@ -3,7 +3,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 load_dotenv('.env')
 
-CASSANDRA_HOSTS = environ.get('CASSANDRA_HOSTS', 'localhost').split(',')
+CASSANDRA_HOSTS = environ.get('CASSANDRA_HOSTS', ['localhost']).split(',')
 CASSANDRA_PORT = int(environ.get('CASSANDRA_PORT', 9042))
 CASSANDRA_KEYSPACE = environ.get('CASSANDRA_KEYSPACE', 'lcmap')
 CASSANDRA_USER = environ.get('CASSANDRA_USER', None)
