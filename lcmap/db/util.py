@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def as_array(row, size=30 * 100):
+def as_array(row):
     """Convert raw data into a shaped, masked, and scaled array.
     """
     arr = np.ma.frombuffer(row.data, dtype=row.data_type)
@@ -25,7 +25,7 @@ def as_array(row, size=30 * 100):
     return arr
 
 
-def meld(cube, grid=30 * 100, size=100):
+def meld(cube, grid=30*256, size=256):
 
     # trim out statements that did not return anything and reshape to only return the data rows
     rows = [row for result in cube if result[0] and len(result[1]) > 0 for row in result[1]]
@@ -100,9 +100,9 @@ def _merge(source, ys, xs, grid, size):
             x_data.append(x_chunk)
 
         if len(x_data) > 0:
-            y_data.append(np.vstack(x_data))
+            y_data.append(np.hstack(x_data))
         else:
             # fill the entire y if there is no x data
-            y_data.append(np.vstack([gap] * len(xs)))
+            y_data.append(np.hstack([gap] * len(xs)))
 
-    return np.hstack(y_data)
+    return np.vstack(y_data)
