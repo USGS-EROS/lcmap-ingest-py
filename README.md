@@ -47,7 +47,7 @@ nohup python ingest "/data/Landsat/*046029*" > logs/046029.log &
 ### With ``pip``
 
 ```
-pip install git+https://github.com/USGS-EROS/lcmap-py.git@master
+pip install git+https://github.com/USGS-EROS/lcmap-ingest-py.git@master
 ```
 
 ### Development
