@@ -83,6 +83,7 @@ class Band:
                 obj = dict()
                 obj['x'] = int(tx)
                 obj['y'] = int(ty)
+                # XXX this needs to be updated, now that the schema has changed
                 obj['layer'] = self.name
                 obj['source'] = self.scene.name
                 obj['acquired'] = self.scene.acquired
