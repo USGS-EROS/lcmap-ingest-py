@@ -8,12 +8,13 @@ CREATE KEYSPACE lcmap WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 
 CREATE TABLE lcmap.epsg_5070 (
     x int,
     y int,
-    layer text,
+    ubid text,
     acquired timestamp,
     data blob,
 
     -- by rule, all data contained in a row must be uniformly typed,
     -- ranged, filled, shaped, and scaled.
+    -- ubid: mission, product, band number
 
     data_fill int static,
     data_range list<int> static,
