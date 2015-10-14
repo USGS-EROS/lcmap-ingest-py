@@ -58,3 +58,19 @@ use this instead of the usual `install` command.
 ```
 python setup.py develop
 ```
+
+### Testing
+
+To run the unit tests, make sure you have ``tox`` installed:
+
+```bash
+$ pip install tox
+```
+
+And then simply execute ``tox``:
+
+```bash
+$ tox
+```
+
+This will execute against Python 2.7, Python 3.4, and pypy environments.
