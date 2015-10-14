@@ -23,7 +23,9 @@ class TestBand(unittest.TestCase):
         scene = Mock(name="test-scene", acquired="yesterday")
         args = dict(
             path=tile_path,
-            name="test-scene",
+            mission="L8",
+            product="SR",
+            number=4,
             scene=scene,
             fill=255,
             valid_range=range(-2000, 16000),
