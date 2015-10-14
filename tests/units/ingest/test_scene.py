@@ -27,7 +27,6 @@ class TestScene(unittest.TestCase):
         b = [b for b in s.bands]
         b1 = s.bands[0]
         self.assertEqual(len(b), 20)
-        self.assertEqual(b1.name, "toa_band1")
         self.assertEqual(b1.path, "tests/data/scenes/LC80440342015176/LC80440342015176LGN00_toa_band1.tif")
         self.assertEqual(b1.fill,   -9999)
         self.assertEqual(b1.scale, 0.0001)
