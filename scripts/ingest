@@ -110,7 +110,7 @@ def expand_and_ingest(file, file_idx, file_count, **kwargs):
 
 @click.command()
 @click.argument("source",     default="data/*.tar.gz")
-@click.option("--tile-size",  default=100)
+@click.option("--tile-size",  default=256)
 @click.option("--pixel-size", default=30)
 def process(source, **kwargs):
     """Ingest multiple scenes."""
