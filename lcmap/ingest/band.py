@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 class Band:
 
-    def __init__(self, scene, name, path, fill, valid_range, scale):
+    def __init__(self, mission, product, number, scene, path, fill, valid_range, scale):
+        self.ubid = self.ubid(mission, product, number)
         self.scene = scene
-        self.name = name
         self.path = path
         self.fill = fill
         self.valid_range = valid_range
@@ -84,7 +84,7 @@ class Band:
                 obj['x'] = int(tx)
                 obj['y'] = int(ty)
                 # XXX this needs to be updated, now that the schema has changed
-                obj['layer'] = self.name
+                obj['ubid'] = self.ubid
                 obj['source'] = self.scene.name
                 obj['acquired'] = self.scene.acquired
                 obj['data'] = data
@@ -122,19 +122,19 @@ class Band:
         # too big or too small.
         if (abs(ox) != pixel_size) or (abs(oy) != pixel_size):
             msg = """band {0} input raster pixel sizes ({1},{2}) do not match tile pixel size ({3})"""
-            params = (self.name, ox, oy, pixel_size)
+            params = (self.ubid, ox, oy, pixel_size)
             raise errors.IngestInputException(msg.format(*params))
 
         # The upper left of the raster must be a multiple of the pixel size
         # otherwise pixels "straddle" between two pixels on the tile grid.
         if (ux-offset_x) % pixel_size:
             msg = "band {0} upper left x coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
-            params = (self.name, ux, pixel_size, offset_x)
+            params = (self.ubid, ux, pixel_size, offset_x)
             raise errors.IngestInputException(msg.format(*params))
 
         if (uy-offset_y) % pixel_size:
             msg = "band {0} upper left y coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
-            params = (self.name, uy, pixel_size, offset_y)
+            params = (self.ubid, uy, pixel_size, offset_y)
             raise errors.IngestInputException(msg.format(*params))
 
         # If the upper-left point does not divide evenly, then it is offset.
@@ -179,12 +179,12 @@ class Band:
     #
 
     @property
-    def name(self):
-        return self._name
+    def ubid(self):
+        return self._ubid
 
     @name.setter
-    def name(self, value):
-        self._name = value
+    def ubid(self, mission, product, number):
+        self._ubid = "{}:{}:{}".format(mission, product, number)
 
     @property
     def path(self):
@@ -232,14 +232,19 @@ class Band:
     def from_xml(xml, scene):
         """Generate a Band object using metadata contained in the given xml"""
 
+        # XXX extract mission, product, and band number info from XML
+        mission = ""
+        product = ""
+        number = ""
+        
         # This is the name of the band itself. Unfortunately the same name is
         # used for different spectra between missions... so we need to figure
         # out how to handle that potential problem at some point.
-        name_attr = xml.get("name")
-        if name_attr is not None:
-            name = name_attr
-        else:
-            name = None
+        #name_attr = xml.get("name")
+        #if name_attr is not None:
+        #    name = name_attr
+        #else:
+        #    name = None
 
         # The band is referenced in the metadata relative to whatever
         # directory contains the XML metadata. Construct a path...
@@ -269,5 +274,7 @@ class Band:
         else:
             scale = None
 
-        return Band(scene=scene, name=name, path=path, fill=fill, valid_range=vr, scale=scale)
+        return Band(mission=mission, product=product, number=number,
+                    scene=scene, path=path, fill=fill, valid_range=vr,
+                    scale=scale)
 
