@@ -23,7 +23,7 @@ CREATE TABLE lcmap.epsg_5070 (
     data_type text static,
     source text,
 
-    PRIMARY KEY ((x, y, layer), acquired)
+    PRIMARY KEY ((x, y, ubid), acquired)
 
 ) WITH CLUSTERING ORDER BY (acquired DESC)
   AND COMPRESSION = { 'sstable_compression' : 'LZ4Compressor' }
