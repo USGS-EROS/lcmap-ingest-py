@@ -61,13 +61,20 @@ python setup.py develop
 
 ### Testing
 
-To run the unit tests, make sure you have ``tox`` installed:
+To run the unit tests, simply run ``nosetests`` in the project directory:
+
+```bash
+$ nosetests
+```
+
+If you would like to run the tests against different versions of Python, there
+is a ``tox.ini`` file set up for that. Make sure you have ``tox`` installed:
 
 ```bash
 $ pip install tox
 ```
 
-And then simply execute ``tox``:
+And then simply execute it:
 
 ```bash
 $ tox
