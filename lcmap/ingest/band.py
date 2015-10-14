@@ -25,11 +25,13 @@ import lcmap.ingest.errors as errors
 import logging
 logger = logging.getLogger(__name__)
 
+def make_ubid(mission, product, number):
+    "{}:{}:{}".format(mission, product, number)
 
 class Band:
 
     def __init__(self, mission, product, number, scene, path, fill, valid_range, scale):
-        self.ubid = self.ubid(mission, product, number)
+        self.ubid = make_ubid(mission, product, number)
         self.scene = scene
         self.path = path
         self.fill = fill
@@ -182,9 +184,9 @@ class Band:
     def ubid(self):
         return self._ubid
 
-    @name.setter
-    def ubid(self, mission, product, number):
-        self._ubid = "{}:{}:{}".format(mission, product, number)
+    @ubid.setter
+    def ubid(self, value):
+        self._ubid = value
 
     @property
     def path(self):
