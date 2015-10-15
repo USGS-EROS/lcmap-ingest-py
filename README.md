@@ -42,17 +42,23 @@ Create a .env file to specify your database configuration parameters.
 Ingest a single file, logging all output to standard out.
 
 ```
-python ingest /data/Landsat/some-scene.tar.gz
+$ ./scripts/ingest /data/Landsat/some-scene.tar.gz
 ```
+
+Ingest a bunch of files at once:
+
+```
+$ ./scripts/ingest /data/Landsat/*01234*.tar.gz
+```
+
+### Advanced
 
 You can run ingest in parallel on groups of files, logging all output to a file,
 using a temporary directory of your choice to hold decompressed scenes.
 
-### Advanced
-
 ```
-export TEMP=/data/tmp
-mkdir
+$ export TEMP=/data/tmp
+$ mkdir
 nohup python ingest "/data/Landsat/*045026*" > logs/045026.log &
 nohup python ingest "/data/Landsat/*045027*" > logs/045027.log &
 nohup python ingest "/data/Landsat/*045028*" > logs/045028.log &
