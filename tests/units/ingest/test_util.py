@@ -29,6 +29,9 @@ class TestUtil(unittest.TestCase):
         x, y = u.snap(0, 8000)
         self.assertEqual(x, 0)
         self.assertEqual(y, 15360)
+        x, y = u.snap(0, -8000)
+        self.assertEqual(x, 0)
+        self.assertEqual(y, -7680)
 
     def test_snap_y_simple_04(self):
         x, y = u.snap(0, -1500)
@@ -78,10 +81,16 @@ class TestUtil(unittest.TestCase):
         x, y = u.snap(1500, 0)
         self.assertEqual(x, 0)
         self.assertEqual(y, 0)
+        x, y = u.snap(-1500, 0)
+        self.assertEqual(x, -7680)
+        self.assertEqual(y, 0)
 
     def test_snap_x_simple_03(self):
         x, y = u.snap(8000, 0)
         self.assertEqual(x, 7680)
+        self.assertEqual(y, 0)
+        x, y = u.snap(-8000, 0)
+        self.assertEqual(x, -15360)
         self.assertEqual(y, 0)
 
     def test_snap_x_simple_04(self):
