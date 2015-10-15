@@ -32,7 +32,8 @@ logger = logging.getLogger()
 
 def get_auth():
     if config.CASSANDRA_USER and config.CASSANDRA_PASS:
-        return PlainTextAuthProvider(username=config.CASSANDRA_USER, password=config.CASSANDRA_PASS)
+        return PlainTextAuthProvider(username=config.CASSANDRA_USER,
+                                     password=config.CASSANDRA_PASS)
 
 def get_retry():
     return RetryPolicy()

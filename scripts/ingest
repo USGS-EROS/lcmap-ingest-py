@@ -8,7 +8,7 @@
    and saves them to Cassandra. It is designed to minimize your
    effort and tell you how things went by logging detailed progress.
 
-   For example, it can take an entired directory that contains
+   For example, it can take an entire directory that contains
    compressed ESPA generated files:
 
    python ingest.py "data/*045026*.tar.gz" > ingest.log

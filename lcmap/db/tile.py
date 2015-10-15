@@ -17,7 +17,8 @@ SAVE_CQL = """INSERT INTO epsg_5070 (x, y, ubid, source, acquired, data,
 SAVE = session.prepare(SAVE_CQL)
 
 
-def save(x, y, ubid, source, acquired, data, data_type, data_fill, data_range, data_scale, data_shape, **kwargs):
+def save(x, y, ubid, source, acquired, data, data_type, data_fill, data_range,
+         data_scale, data_shape, **kwargs):
     """Save"""
     # logger.debug("Saving <%s,%s> (%s:%s) @ %s - %s" %
     #              (x, y, ubid, source, acquired, data_type))
