@@ -15,11 +15,20 @@
 
 """
 
+import contextlib
 import logging
-import sys
+import multiprocessing as mp
 import os
+import glob
+import sys
+import tarfile
+import tempfile
+import traceback
 
-# Try running as an installed module
+import numpy as np
+
+import click
+
 try:
     from lcmap.version import __version__
 except ImportError:
@@ -28,39 +37,20 @@ except ImportError:
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from lcmap.version import __version__
 
+import lcmap.config as config
+import lcmap.db.scene
+import lcmap.db.tile
+from lcmap.ingest.scene import Scene
 
-# Logging to stdout is useful for debugging
 
 ch = logging.StreamHandler(sys.stdout)
 ch.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(ch)
-
-# More detailed logging is available too...
 lcmap_logger = logging.getLogger('lcmap')
 lcmap_logger.setLevel(logging.DEBUG)
 lcmap_logger.addHandler(ch)
-
-
-# We're doing some work with zip files and temporary directories.
-import os.path
-import glob
-import tempfile
-import tarfile
-import contextlib
-import traceback
-import multiprocessing as mp
-import numpy as np
-import lcmap.config as config
-
-# Click makes command line programs a bit more concise...
-import click
-
-# Keep the ESPA XML files nice and isolated.
-from lcmap.ingest.scene import Scene
-import lcmap.db.tile
-import lcmap.db.scene
 
 
 @contextlib.contextmanager
@@ -113,10 +103,9 @@ def expand_and_ingest(file, file_idx, file_count, **kwargs):
 @click.option("--tile-size",  default=256)
 @click.option("--pixel-size", default=30)
 def process(source, **kwargs):
-    """Ingest multiple scenes."""
-
+    """Ingest multiple scenes.
+    """
     logger.info("processing started")
-
     logger.info(kwargs)
 
     # Create a sorted list of files, sorting helps keep track of progress
