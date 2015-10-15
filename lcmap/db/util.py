@@ -10,7 +10,7 @@ import numpy as np
 import numpy.ma as ma
 
 
-def as_array(row, size=30 * 100):
+def as_array(row, size=30 * 256):
     """Convert raw data into a shaped, masked, and scaled array.
     """
     arr = np.ma.frombuffer(row.data, dtype=row.data_type)

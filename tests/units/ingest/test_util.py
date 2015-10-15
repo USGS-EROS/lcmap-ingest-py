@@ -23,12 +23,12 @@ class TestUtil(unittest.TestCase):
     def test_snap_y_simple_02(self):
         x, y = u.snap(0, 1500)
         self.assertEqual(x, 0)
-        self.assertEqual(y, 3000)
+        self.assertEqual(y, 7680)
 
     def test_snap_y_simple_03(self):
-        x, y = u.snap(0, 3456)
+        x, y = u.snap(0, 8000)
         self.assertEqual(x, 0)
-        self.assertEqual(y, 6000)
+        self.assertEqual(y, 15360)
 
     def test_snap_y_simple_04(self):
         x, y = u.snap(0, -1500)
@@ -36,9 +36,14 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(y, 0)
 
     def test_snap_y_simple_05(self):
-        x, y = u.snap(0, -3456)
+        x, y = u.snap(0, -16000)
+        # XXX I need some convincing here ... -15000 and -8000 both snap to
+        # -7680, and I think this behaviour might be different than the
+        # positive numbers. Will talk with Jon about this the next time I'm in
+        # the office. I may just need to get an update on how snapping is
+        # intended to work (i.e., there may not actually be a problem here).
         self.assertEqual(x, 0)
-        self.assertEqual(y, -3000)
+        self.assertEqual(y, -15360)
 
     def test_snap_y_offset_01(self):
         x, y = u.snap(0, 9, offset_y=10)
@@ -48,17 +53,17 @@ class TestUtil(unittest.TestCase):
     def test_snap_y_offset_02(self):
         x, y = u.snap(0, 10, offset_y=10)
         self.assertEqual(x, 0)
-        self.assertEqual(y, 3010)
+        self.assertEqual(y, 7690)
 
     def test_snap_y_offset_02(self):
         x, y = u.snap(0, 11, offset_y=10)
         self.assertEqual(x, 0)
-        self.assertEqual(y, 3010)
+        self.assertEqual(y, 7690)
 
     def test_snap_y_offset_03(self):
-        x, y = u.snap(0, 500, offset_y=100)
+        x, y = u.snap(0, 500, offset_y=256)
         self.assertEqual(x, 0)
-        self.assertEqual(y, 3100)
+        self.assertEqual(y, 7936)
 
     #
     # Snapping x-coordinate test
@@ -75,24 +80,24 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(y, 0)
 
     def test_snap_x_simple_03(self):
-        x, y = u.snap(3500, 0)
-        self.assertEqual(x, 3000)
+        x, y = u.snap(8000, 0)
+        self.assertEqual(x, 7680)
         self.assertEqual(y, 0)
 
     def test_snap_x_simple_04(self):
         x, y = u.snap(-1500, 0)
-        self.assertEqual(x, -3000)
+        self.assertEqual(x, -7680)
         self.assertEqual(y, 0)
 
     def test_snap_x_offset_01(self):
         x, y = u.snap(0, 0, offset_x=10)
-        self.assertEqual(x, -2990)
+        self.assertEqual(x, -7670)
         self.assertEqual(y, 0)
 
     def test_snap_x_offset_02(self):
-        x, y = u.snap(3000, 3000, offset_x=-10)
-        self.assertEqual(x,  2990)
-        self.assertEqual(y,  3000)
+        x, y = u.snap(7680, 7680, offset_x=-10)
+        self.assertEqual(x,  7670)
+        self.assertEqual(y,  7680)
 
     def test_snap_x_offset_03(self):
         x, y = u.snap(11, 0, offset_x=10)
@@ -100,19 +105,19 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(y, 0)
 
     def test_snap_x_offset_04(self):
-        x, y = u.snap(500, 0, offset_x=100)
-        self.assertEqual(x, 100)
+        x, y = u.snap(500, 0, offset_x=256)
+        self.assertEqual(x, 256)
         self.assertEqual(y, 0)
 
     def test_snap_realistic(self):
         x, y = u.snap(-2264999, 3128999)
-        self.assertEqual(x, -2265000)
-        self.assertEqual(y,  3129000)
+        self.assertEqual(x, -2265600)
+        self.assertEqual(y,  3133440)
 
     def test_snap_with_offset(self):
-        x, y = u.snap(-2265000, 3129000, offset_y=10)
-        self.assertEqual(x, -2265000)
-        self.assertEqual(y,  3129010)
+        x, y = u.snap(-2264999, 3128999, offset_y=10)
+        self.assertEqual(x, -2265600)
+        self.assertEqual(y,  3133450)
 
     def test_frame_small_fits_in_one_tile(self):
         """Array is too small but fits entirely in one tile."""

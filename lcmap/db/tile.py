@@ -48,7 +48,7 @@ def find(x, y, ubid, t1, t2):
     return results
 
 
-def find_area(x1, y1, x2, y2, ubid, t1, t2, grid=30 * 100):
+def find_area(x1, y1, x2, y2, ubid, t1, t2, grid=30 * 256):
     """Find an area containing x1:x2, y1:y2.
 
     Like find, this function does not post-process results. This is a simple

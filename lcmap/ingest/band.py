@@ -63,7 +63,7 @@ class Band:
         #
         # This is the right order, even though it seems strange. It is
         # expected that oy is negative... and that ux and uy are multiples
-        # of the tiling grid (30*100 = strides of 3,000)
+        # of the tiling grid (30*256 = strides of 7,680)
         #
         ux, ox, rx, uy, ry, oy = self.raster.GetGeoTransform()
 
@@ -165,7 +165,7 @@ class Band:
 
 
     @property
-    def tile_count(self, size=100):
+    def tile_count(self, size=256):
         return int((self.raster.RasterXSize/size)*(self.raster.RasterYSize/size))
 
     @property

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
 
-def snap(x, y, tile_size=100, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
+def snap(x, y, tile_size=256, pixel_x=30, pixel_y=30, offset_x=0, offset_y=0):
     """Convert an x/y to the nearest upper left grid coordinate.
 
     Suppose a projection system with 30 meter pixels. If the upper-left coordinate
@@ -104,7 +104,7 @@ def extents(path, epsg=5070):
     return {'extent-in': i, 'extent-out': o}
 
 
-def frame(original, gx=0, gy=0, tx=100, ty=100, fill=0):
+def frame(original, gx=0, gy=0, tx=256, ty=256, fill=0):
     """Surround data not aligned to the tile grid with fill data.
 
     This function doesn't know anything about coordinate systems. You must
@@ -149,7 +149,7 @@ def frame_raster(raster, tile_size, fill):
     offset_y = uy % oy
 
     # The column and row of the pixel in terms of a raster grid. Suppose we
-    # have 100 meter pixels projected in EPSG:5070. Every 100 meter change
+    # have 256 meter pixels projected in EPSG:5070. Every 256 meter change
     # along an axis is 1 step in the raster grid.
     gx, gy = ux / ox, uy / oy
 
