@@ -1,9 +1,3 @@
--- Local
-CREATE KEYSPACE lcmap WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'DC1' : 1};
-
--- EC2
-CREATE KEYSPACE lcmap WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', 'us-west-2' : 3 };
-
 -- Tiles
 CREATE TABLE lcmap.epsg_5070 (
     x int,
