@@ -5,11 +5,32 @@ to store time-series oriented, analysis ready Landsat imagery.
 
 ## More Information
 
-This project is hosted by the US Geological Survey (USGS) Earth Resources Observation
-and Science (EROS) Land Change Monitoring, Assessment, and Projection (LCMAP) Project.
-For questions regarding this source code, please contact the Landsat Contact Us page
-and specify USGS LCMAP in the "Regarding" section. https://landsat.usgs.gov/contactus.php
+This project is hosted by the US Geological Survey (USGS) Earth Resources
+Observation and Science (EROS) Land Change Monitoring, Assessment, and
+Projection (LCMAP) Project. For questions regarding this source code, please
+contact the Landsat Contact Us page and specify USGS LCMAP in the "Regarding"
+section. https://landsat.usgs.gov/contactus.php
 
+## Cassandra Setup
+
+Before running the ingest script, you need to have the keyspace and schema set
+up. If you are running Cassandra on EC2, use this command:
+
+```bash
+$ cqlsh -f config/keyspace-ec2.cql
+```
+
+Otherwise, use this:
+
+```bash
+$ cqlsh -f config/keyspace.cql
+```
+
+Then, to load the schema into Cassandra, do the following:
+
+```bash
+$ cqlsh -f config/schema.cql
+```
 
 ## Ingest Usage
 
