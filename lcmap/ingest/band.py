@@ -25,9 +25,11 @@ import lcmap.ingest.errors as errors
 import logging
 logger = logging.getLogger(__name__)
 
+
 def make_ubid(mission, product, number):
     "{}:{}:{}".format(mission, product, number)
 
+    
 class Band:
 
     def __init__(self, mission, product, number, scene, path, fill, valid_range,
@@ -233,8 +235,8 @@ class Band:
         """Generate a Band object using metadata contained in the given xml"""
 
         # XXX extract mission, product, and band number info from XML
-        mission = ""
-        product = ""
+        mission = util.extract_mission_abbr(xml.find("app_version"))
+        product = xml.get("product")
         number = util.extract_band_number(xml.get("name"))
 
         # This is the name of the band itself. Unfortunately the same name is

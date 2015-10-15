@@ -138,6 +138,7 @@ def frame(original, gx=0, gy=0, tx=256, ty=256, fill=0):
 
     return framed
 
+
 def frame_raster(raster, tile_size, fill):
     """Create a tile-grid aligned array from a GDAL raster.
 
@@ -168,6 +169,7 @@ def frame_raster(raster, tile_size, fill):
 
     return framed, cx, cy
 
+
 def extract_band_number(band_name):
     """Given a band name, extract the band number.
 
@@ -175,5 +177,15 @@ def extract_band_number(band_name):
     value is of the form {product}_band{number}. This function extracts the
     value of {number} from that attribute value.
     """
-    results = re.match("(?P<product>.*)_band(?P<number>\d)", "toa_band3")
+    results = re.match("(?P<product>.*)_band(?P<number>\d)", band_name)
     return int(results.group("number"))
+
+
+def extract_mission_abbr(app_version):
+    """Given an application version, extract the mission abbreviation.
+
+    In the ESPA XML data, the app version is a subelement of the band element,
+    and it is prefixed with the mission abbreviation.
+    """
+    results = re.match("(?<mission>.*)_.*", app_version)
+    return results.group("mission")
