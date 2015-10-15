@@ -30,7 +30,8 @@ def make_ubid(mission, product, number):
 
 class Band:
 
-    def __init__(self, mission, product, number, scene, path, fill, valid_range, scale):
+    def __init__(self, mission, product, number, scene, path, fill, valid_range,
+                 scale):
         self.ubid = make_ubid(mission, product, number)
         self.scene = scene
         self.path = path
@@ -38,10 +39,7 @@ class Band:
         self.valid_range = valid_range
         self.scale = scale
 
-    #
-    # TODO:
-    # Check pixel size and offset constraints.
-    #
+    # TODO: Check pixel size and offset constraints.
 
     def tiles(self, tile_size, pixel_size, **kwargs):
         """Generate tiles (as a generator)
@@ -97,7 +95,6 @@ class Band:
                 obj['data_shape'] = data.shape
                 yield obj
 
-
     def misfit(self, tile_size, pixel_size):
         """Check alignment between the raster tile grid.
 
@@ -123,19 +120,22 @@ class Band:
         # size, otherwise a tile will contain data for an area that is either
         # too big or too small.
         if (abs(ox) != pixel_size) or (abs(oy) != pixel_size):
-            msg = """band {0} input raster pixel sizes ({1},{2}) do not match tile pixel size ({3})"""
+            msg = ("band {0} input raster pixel sizes ({1},{2}) do not match "
+                   "tile pixel size ({3})")
             params = (self.ubid, ox, oy, pixel_size)
             raise errors.IngestInputException(msg.format(*params))
 
         # The upper left of the raster must be a multiple of the pixel size
         # otherwise pixels "straddle" between two pixels on the tile grid.
         if (ux-offset_x) % pixel_size:
-            msg = "band {0} upper left x coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            msg = ("band {0} upper left x coordinate ({1}) must be an even "
+                   "multiple of pixel_size ({2}+{3})")
             params = (self.ubid, ux, pixel_size, offset_x)
             raise errors.IngestInputException(msg.format(*params))
 
         if (uy-offset_y) % pixel_size:
-            msg = "band {0} upper left y coordinate ({1}) must be an even multiple of pixel_size ({2}+{3})"
+            msg = ("band {0} upper left y coordinate ({1}) must be an even "
+                   "multiple of pixel_size ({2}+{3})")
             params = (self.ubid, uy, pixel_size, offset_y)
             raise errors.IngestInputException(msg.format(*params))
 
@@ -154,7 +154,6 @@ class Band:
         else:
             return False
 
-
     def free(self):
         """Remove raster data to reduce consumed memory.
 
@@ -162,7 +161,6 @@ class Band:
         processing them can bring a memory constrained machine to it's knees.
         """
         self._raster = None
-
 
     @property
     def tile_count(self, size=256):
