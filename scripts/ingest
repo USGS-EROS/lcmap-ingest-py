@@ -99,25 +99,22 @@ def expand_and_ingest(file, file_idx, file_count, **kwargs):
 
 
 @click.command()
-@click.argument("source",     default="data/*.tar.gz")
-@click.option("--tile-size",  default=256)
+@click.argument("source", default="data/*.tar.gz", nargs=-1)
+@click.option("--tile-size", default=256)
 @click.option("--pixel-size", default=30)
 def process(source, **kwargs):
     """Ingest multiple scenes.
     """
-    logger.info("processing started")
-    logger.info(kwargs)
+    logger.info("Processing started.")
+    logger.debug("Keyword args: {}".format(kwargs))
+    logger.debug("Source argument: {}".format(source))
+    total = len(source)
+    logger.debug("Number of source files: {}".format(total))
 
-    # Create a sorted list of files, sorting helps keep track of progress
-    # in addition to the file total and enumeration index.
-    files = glob.glob(source)
-    files.sort()
-    total = len(files)
-
-    for idx, file in enumerate(files):
+    for idx, file in enumerate(source):
         expand_and_ingest(file, idx+1, total, **kwargs)
 
-    logger.info("processing complete")
+    logger.info("Processing complete.")
 
 
 if __name__ == "__main__":
