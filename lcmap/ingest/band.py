@@ -237,8 +237,8 @@ class Band:
         # XXX extract mission, product, and band number info from XML
         mission = ""
         product = ""
-        number = ""
-        
+        number = util.extract_band_number(xml.get("name"))
+
         # This is the name of the band itself. Unfortunately the same name is
         # used for different spectra between missions... so we need to figure
         # out how to handle that potential problem at some point.

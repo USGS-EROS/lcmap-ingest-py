@@ -7,17 +7,17 @@
 """
 
 import gdal
-import osr
-import math
-import subprocess
 import json
-import pyproj
-import numpy as np
-
 import logging
+import math
+import numpy as np
+import osr
+import pyproj
+import re
+import subprocess
+
+
 logger = logging.getLogger(__name__)
-
-
 epsg_5070 = pyproj.Proj("+init=EPSG:5070")
 
 
@@ -111,8 +111,10 @@ def frame(original, gx=0, gy=0, tx=256, ty=256, fill=0):
     pass in raster grid upper left coordinates. See to_raster_grid() if you
     need to perform this conversion.
 
-    :param gx: upper-left x in pixel grid coordinate space (**NOT** projection coordinates)
-    :param gy: upper-left y in pixel grid coordinate space (**NOT** projection coordinates)
+    :param gx: upper-left x in pixel grid coordinate space
+      (**NOT** projection coordinates)
+    :param gy: upper-left y in pixel grid coordinate space
+      (**NOT** projection coordinates)
     :param tx: pixel width of tile
     :param ty: pixel height of tile
     :param fill: value to fill framing space
@@ -161,6 +163,17 @@ def frame_raster(raster, tile_size, fill):
                   pixel_x=ox, pixel_y=abs(oy),
                   offset_x=offset_x, offset_y=offset_y)
 
-    logger.debug("reframed raster ux: {0} -> {1}, uy: {2} -> {3}".format(ux, cx, uy, cy))
+    logger.debug("reframed raster ux: {0} -> {1}, uy: {2} -> {3}".format(
+        ux, cx, uy, cy))
 
     return framed, cx, cy
+
+def extract_band_number(band_name):
+    """Given a band name, extract the band number.
+
+    In the ESPA XML data, the band name is an attribute of bands -> band whose
+    value is of the form {product}_band{number}. This function extracts the
+    value of {number} from that attribute value.
+    """
+    results = re.match("(?P<product>.*)_band(?P<number>\d)", "toa_band3")
+    return int(results.group("number"))
