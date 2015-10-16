@@ -177,8 +177,11 @@ def extract_band_number(band_name):
     value is of the form {product}_band{number}. This function extracts the
     value of {number} from that attribute value.
     """
+    number = ""
     results = re.match("(?P<product>.*)_band(?P<number>\d)", band_name)
-    return int(results.group("number"))
+    if results is not None:
+        number = results.group("number")
+    return number
 
 
 def extract_mission_abbr(app_version):
@@ -187,5 +190,8 @@ def extract_mission_abbr(app_version):
     In the ESPA XML data, the app version is a subelement of the band element,
     and it is prefixed with the mission abbreviation.
     """
-    results = re.match("(?<mission>.*)_.*", app_version)
-    return results.group("mission")
+    mission = ""
+    results = re.match("(?P<mission>.*)_.*", app_version)
+    if results is not None:
+        mission = results.group("mission")
+    return mission

@@ -235,7 +235,11 @@ class Band:
         """Generate a Band object using metadata contained in the given xml"""
 
         # XXX extract mission, product, and band number info from XML
-        mission = util.extract_mission_abbr(xml.find("app_version"))
+        mission = ""
+        app_version_element = xml.find("app_version")
+        if app_version_element is not None:
+            if app_version_element.text is not None:
+                mission = util.extract_mission_abbr(app_version_element.text)
         product = xml.get("product")
         number = util.extract_band_number(xml.get("name"))
 
