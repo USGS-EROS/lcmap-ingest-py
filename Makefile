@@ -23,4 +23,7 @@ schema-ec2:
 	cqlsh -f config/keyspace-ec2.cql
 	cqlsh -f config/schema.cql
 
+drop:
+	cqlsh -f config/drop.cql
+
 .PHONY: venv
