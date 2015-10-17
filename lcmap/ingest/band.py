@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 def make_ubid(mission, product, number):
-    "{}:{}:{}".format(mission, product, number)
+    return "{}:{}:{}".format(mission, product, number)
 
-    
+
 class Band:
 
     def __init__(self, mission, product, number, scene, path, fill, valid_range,
