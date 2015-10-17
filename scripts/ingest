@@ -19,7 +19,6 @@ import contextlib
 import logging
 import multiprocessing as mp
 import os
-import glob
 import sys
 import tarfile
 import tempfile
@@ -62,23 +61,34 @@ def temporarily_expanded(path):
         # we don't even bother with anything else.
         into = tempfile.TemporaryDirectory()
         data = tarfile.open(str(path))
-        logger.debug("decompressing {0} to {1}".format(path, into.name))
+        logger.debug("Decompressing {0} to {1}".format(path, into.name))
         data.extractall(into.name)
         yield into.name
     finally:
         # We need to make sure that `into' is actually assigned
         # a value...
-        logger.debug("removing extracted files {0}".format(into.name))
+        logger.debug("Cleanup: removing extracted files in{0}".format(
+            into.name))
         into.cleanup()
 
 
 def ingest(scene, **kwargs):
-    """Tile and save all available bands in scene."""
+    """Tile and save all available bands in scene.
+    """
+    logger.debug("Kwargs for ingest: {}".format(kwargs))
     band_count = len(scene.bands)
-    for idx, band in enumerate(scene.bands):
+    for (idx, band) in enumerate(scene.bands):
+        # XXX we need to figure out why scene bands are getting NoneType for
+        # their ids
+        ubid = band.ubid or ""
+        logger.debug("Scene name: {}".format(scene.name))
+        logger.debug("Band UBID: {}".format(ubid))
+        logger.debug("Index: {}".format(idx + 1))
+        logger.debug("Band count: {}".format(band_count))
         progress = "{0} [{2:0>2}/{3:0>2}] {1:<20} "
-        logger.info(progress.format(scene.name, band.name, idx + 1, band_count))
+        logger.info(progress.format(scene.name, ubid, idx + 1, band_count))
         for tile in band.tiles(**kwargs):
+            logger.debug("Tile: {}".format(tile))
             if not np.all(tile['data'] == band.fill):
                 lcmap.db.tile.save(**tile)
         band.free()
@@ -89,13 +99,18 @@ def expand_and_ingest(file, file_idx, file_count, **kwargs):
     try:
         with temporarily_expanded(file) as scene_path:
             scene = Scene(scene_path)
-            progress = "{0} [{1:0>3}/{2:0>3}] ingest started from {3}"
+            logger.debug("Scene path: {}".format(scene_path))
+            progress = ("Ingest of {0} [{1:0>3}/{2:0>3}] starting "
+                        "(processing files in {3}) ...")
             logger.info(
                 progress.format(scene.name, file_idx, file_count, scene_path))
+            logger.debug("Scene: {}".format(scene))
+            logger.debug("Scene bands: {}".format(scene.bands))
             ingest(scene, **kwargs)
-            logger.info("{0} ingest finished".format(scene.name))
+            logger.info("Ingest for {0} finished.".format(scene.name))
     except Exception as err:
-        logger.error("ingest failed {0}: {1}".format(file, err))
+        logger.error("Ingest of {0} failed: {1}".format(file, err))
+        raise err
 
 
 @click.command()
@@ -105,7 +120,7 @@ def expand_and_ingest(file, file_idx, file_count, **kwargs):
 def process(source, **kwargs):
     """Ingest multiple scenes.
     """
-    logger.info("Processing started.")
+    logger.info("Starting script ...")
     logger.debug("Keyword args: {}".format(kwargs))
     logger.debug("Source argument: {}".format(source))
     total = len(source)
