@@ -191,7 +191,7 @@ def extract_mission_abbr(app_version):
     and it is prefixed with the mission abbreviation.
     """
     mission = ""
-    results = re.match("(?P<mission>.*)_.*", app_version)
+    results = re.match("(?P<mission>[^_]*)_.*", app_version)
     if results is not None:
         mission = results.group("mission")
     return mission
