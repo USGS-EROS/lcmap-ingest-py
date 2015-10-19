@@ -13,6 +13,22 @@ section. https://landsat.usgs.gov/contactus.php
 
 ## Cassandra Setup
 
+### Clustering
+
+Setting up Cassandra clusters is beyond the scope of this README. However, if
+you are just testing this on a single host, you can use the
+[ccm tool](https://github.com/pcmanus/ccm). ``make`` targets are provided in
+this project to set up a local cluster for testing.  Simply run the following:
+
+```bash
+$ make ccm
+```
+
+If you are running a local cluster of more than one node with ccm, you will
+need to make sure that you have network interface aliases set up (usually off
+of the loopback device).
+
+### Schemas
 Before running the ingest script, you need to have the keyspace and schema set
 up. If you are running Cassandra on EC2, use this command:
 
@@ -20,10 +36,16 @@ up. If you are running Cassandra on EC2, use this command:
 $ cqlsh -f config/keyspace-ec2.cql
 ```
 
+If running with a datacenter setup:
+
+```bash
+$ cqlsh -f config/keyspace-dc.cql
+```
+
 Otherwise, use this:
 
 ```bash
-$ cqlsh -f config/keyspace.cql
+$ cqlsh -f config/keyspace-local.cql
 ```
 
 Then, to load the schema into Cassandra, do the following:
