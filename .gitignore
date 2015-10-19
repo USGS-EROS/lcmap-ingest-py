@@ -3,9 +3,9 @@ __pycache__
 .env
 venv
 *.log
-
+*.sw[po]
 build/*
 dist/*
 LCMAP.egg-info/
 .tox
-.venv
+.venv*
