@@ -19,6 +19,7 @@ import contextlib
 import logging
 import multiprocessing as mp
 import os
+import shutil
 import sys
 import tarfile
 import tempfile
@@ -59,17 +60,17 @@ def temporarily_expanded(path):
     try:
         # Allocate temporary space. If this does not succeed,
         # we don't even bother with anything else.
-        into = tempfile.TemporaryDirectory()
+        into = tempfile.mkdtemp()
         data = tarfile.open(str(path))
-        logger.debug("Decompressing {0} to {1}".format(path, into.name))
-        data.extractall(into.name)
-        yield into.name
+        logger.debug("Decompressing {0} to {1}".format(path, into))
+        data.extractall(into)
+        yield into
     finally:
         # We need to make sure that `into' is actually assigned
         # a value...
         logger.debug("Cleanup: removing extracted files in{0}".format(
-            into.name))
-        into.cleanup()
+            into))
+        shutil.rmtree(into)
 
 
 def ingest(scene, **kwargs):

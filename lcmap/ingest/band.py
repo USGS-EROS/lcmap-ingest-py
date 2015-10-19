@@ -231,6 +231,7 @@ class Band:
     def scene(self, value):
         self._scene = value
 
+    @staticmethod
     def from_xml(xml, scene):
         """Generate a Band object using metadata contained in the given xml"""
 
