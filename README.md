@@ -33,25 +33,25 @@ Before running the ingest script, you need to have the keyspace and schema set
 up. If you are running Cassandra on EC2, use this command:
 
 ```bash
-$ cqlsh -f config/keyspace-ec2.cql
+$ cqlsh -f db/keyspace-ec2.cql
 ```
 
 If running with a datacenter setup:
 
 ```bash
-$ cqlsh -f config/keyspace-dc.cql
+$ cqlsh -f db/keyspace-dc.cql
 ```
 
 Otherwise, use this:
 
 ```bash
-$ cqlsh -f config/keyspace-local.cql
+$ cqlsh -f db/keyspace-local.cql
 ```
 
 Then, to load the schema into Cassandra, do the following:
 
 ```bash
-$ cqlsh -f config/schema.cql
+$ cqlsh -f db/schema.cql
 ```
 
 ## Ingest Usage

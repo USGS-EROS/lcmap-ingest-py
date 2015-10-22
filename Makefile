@@ -19,27 +19,27 @@ deps: $(VENV)
 venv: deps
 
 schema-local:
-	cqlsh -f config/keyspace-local.cql
-	cqlsh -f config/schema.cql
+	cqlsh -f db/keyspace-local.cql
+	cqlsh -f db/schema.cql
 
 schema-dc:
-	cqlsh -f config/keyspace-dc.cql
-	cqlsh -f config/schema.cql
+	cqlsh -f db/keyspace-dc.cql
+	cqlsh -f db/schema.cql
 
 schema-ec2:
-	cqlsh -f config/keyspace-ec2.cql
-	cqlsh -f config/schema.cql
+	cqlsh -f db/keyspace-ec2.cql
+	cqlsh -f db/schema.cql
 
 schema-ccm:
 	. $(CCM_VENV)/bin/activate && \
-	~/.ccm/testcluster/node1/bin/cqlsh -f config/keyspace-local.cql && \
-	~/.ccm/testcluster/node1/bin/cqlsh -f config/schema.cql
+	~/.ccm/testcluster/node1/bin/cqlsh -f db/keyspace-local.cql && \
+	~/.ccm/testcluster/node1/bin/cqlsh -f db/schema.cql
 
 drop:
-	cqlsh -f config/drop.cql
+	cqlsh -f db/drop.cql
 
 drop-ccm:
-	~/.ccm/testcluster/node1/bin/cqlsh -f config/drop.cql
+	~/.ccm/testcluster/node1/bin/cqlsh -f db/drop.cql
 
 $(CCM_VENV):
 	virtualenv --python=python2.7 --system-site-packages --no-pip $(CCM_VENV)
