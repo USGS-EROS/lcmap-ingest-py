@@ -30,7 +30,7 @@ CREATE TABLE lcmap.job (
     science_model text,
     result_keyspsace text,
     result_table text,
-    result_id,
+    result_id text,
     acquired timestamp,
 
     PRIMARY KEY ((id, science_model), acquired)
