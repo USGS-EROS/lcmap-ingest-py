@@ -22,3 +22,19 @@ CREATE TABLE lcmap.epsg_5070 (
 ) WITH CLUSTERING ORDER BY (acquired DESC)
   AND COMPRESSION = { 'sstable_compression' : 'LZ4Compressor' }
   AND COMMENT = 'NAD83 / Conus Albers, uniformly projected and shaped tiles.';
+
+-- Job Management (Science Model Execution Tracking)
+CREATE TABLE lcmap.job (
+    id text,
+    status text,
+    science_model text,
+    result_keyspsace text,
+    result_table text,
+    result_id,
+    acquired timestamp,
+
+    PRIMARY KEY ((id, science_model), acquired)
+
+) WITH CLUSTERING ORDER BY (acquired DESC)
+  AND COMPRESSION = { 'sstable_compression' : 'LZ4Compressor' }
+  AND COMMENT = 'Science model job results tracking and linking.';
