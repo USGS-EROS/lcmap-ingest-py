@@ -25,16 +25,15 @@ CREATE TABLE lcmap.epsg_5070 (
 
 -- Job Management (Science Model Execution Tracking)
 CREATE TABLE lcmap.job (
-    id text,
+    job_id text,
     status text,
-    science_model text,
+    science_model_name text,
+    execution_parameters text,
     result_keyspsace text,
     result_table text,
     result_id text,
-    acquired timestamp,
 
-    PRIMARY KEY ((id, science_model), acquired)
+    PRIMARY KEY (science_model_name)
 
-) WITH CLUSTERING ORDER BY (acquired DESC)
-  AND COMPRESSION = { 'sstable_compression' : 'LZ4Compressor' }
+) WITH  COMPRESSION = { 'sstable_compression' : 'LZ4Compressor' }
   AND COMMENT = 'Science model job results tracking and linking.';
